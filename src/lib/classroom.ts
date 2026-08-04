@@ -22,6 +22,24 @@ export interface Classroom {
   students: Record<string, StudentState>; // key: nickname
 }
 
+/** Trim + collapse whitespace for nicknames / class codes. */
+export const normalizeLabel = (value: string) => value.trim().replace(/\s+/g, ' ');
+
+/** Case-insensitive key for new student records. */
+export const nicknameKey = (nickname: string) => normalizeLabel(nickname).toLowerCase();
+
+/** Find the Firestore students map key for a nickname (case-insensitive, supports legacy keys). */
+export const findStudentKey = (
+  students: Record<string, StudentState> | undefined,
+  nickname: string
+): string | null => {
+  if (!students) return null;
+  const key = nicknameKey(nickname);
+  if (students[key]) return key;
+  const found = Object.keys(students).find((k) => k.toLowerCase() === key);
+  return found ?? null;
+};
+
 // --- CLOUD EXISTENCE CHECKS ---
 
 export const checkClassExists = async (classCode: string): Promise<boolean> => {
@@ -32,7 +50,7 @@ export const checkClassExists = async (classCode: string): Promise<boolean> => {
 
 export const checkStudentExists = async (classCode: string, nickname: string): Promise<boolean> => {
   const cls = await getClass(classCode);
-  return !!(cls && cls.students && cls.students[nickname]);
+  return !!findStudentKey(cls?.students, nickname);
 };
 
 // --- DATABASE OPERATIONS ---
@@ -56,9 +74,12 @@ export const registerStudent = async (classCode: string, nickname: string): Prom
   const cls = await getClass(classCode);
   if (!cls) return null;
 
+  const displayName = normalizeLabel(nickname);
+  const key = nicknameKey(displayName);
+
   // Progress always starts at Sun; teacher default only caps planet choice on the ring.
   const newStudent: StudentState = {
-    nickname,
+    nickname: displayName,
     planet: 'sun',
     lesson: 'counting',
     completedPlanets: [],
@@ -66,25 +87,19 @@ export const registerStudent = async (classCode: string, nickname: string): Prom
     lastUpdated: Date.now(),
   };
 
-  const updatedStudents = {
-    ...cls.students,
-    [nickname]: newStudent
-  };
-
-  await updateDoc(doc(db, 'classrooms', classCode), { students: updatedStudents });
+  // Dot-path update avoids clobbering concurrent student writes.
+  await updateDoc(doc(db, 'classrooms', classCode), {
+    [`students.${key}`]: newStudent,
+  });
   return newStudent;
 };
 
-export const updateStudentState = async (classCode: string, student: StudentState) => {
-  const cls = await getClass(classCode);
-  if (cls) {
-    student.lastUpdated = Date.now();
-    const updatedStudents = {
-      ...cls.students,
-      [student.nickname]: student
-    };
-    await updateDoc(doc(db, 'classrooms', classCode), { students: updatedStudents });
-  }
+export const updateStudentState = async (classCode: string, student: StudentState, studentKey?: string) => {
+  const key = studentKey || nicknameKey(student.nickname);
+  student.lastUpdated = Date.now();
+  await updateDoc(doc(db, 'classrooms', classCode), {
+    [`students.${key}`]: student,
+  });
 };
 
 export const setClassDefaultStart = async (classCode: string, planet: string) => {

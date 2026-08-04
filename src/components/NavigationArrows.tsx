@@ -23,9 +23,10 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
     <div className="fixed bottom-8 left-0 right-0 flex justify-between px-8 z-10">
       {showBack && onBack ? (
         <Button
+          type="button"
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 border-border bg-card/90 text-foreground hover:bg-muted shadow-sm"
+          className="flex items-center gap-2 border-border bg-card/90 text-foreground hover:bg-muted shadow-sm transition-all duration-200 active:scale-95"
         >
           <ChevronLeft className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />
           <span>{backLabel ?? 'Back'}</span>
@@ -36,9 +37,10 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
       
       {showNext && onNext ? (
         <Button
+          type="button"
           onClick={onNext}
           variant="outline"
-          className="flex items-center gap-2 border-border bg-card/90 text-foreground hover:bg-muted shadow-sm"
+          className="flex items-center gap-2 border-border bg-card/90 text-foreground hover:bg-muted shadow-sm transition-all duration-200 active:scale-95"
         >
           <span>{nextLabel ?? 'Next'}</span>
           <ChevronRight className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />

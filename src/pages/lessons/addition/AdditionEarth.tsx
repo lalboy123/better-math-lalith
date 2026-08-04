@@ -84,7 +84,8 @@ const AdditionEarth: React.FC = () => {
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate('/lesson/addition/mars');
-    }, 2500);
+      setShowRocketTransition(false);
+    }, 1600);
   };
 
   if (showTransition) {

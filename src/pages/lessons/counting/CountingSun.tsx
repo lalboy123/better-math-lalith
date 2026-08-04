@@ -44,7 +44,8 @@ const CountingSun: React.FC = () => {
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate('/lesson/counting/mercury');
-    }, 2500);
+      setShowRocketTransition(false);
+    }, 1600);
   };
 
   if (showTransition) {

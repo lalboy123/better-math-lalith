@@ -66,7 +66,8 @@ const CountingVenus: React.FC = () => {
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate(getLessonRoute(nextPlanet), { state: { initialStep: 0 } });
-    }, 2500);
+      setShowRocketTransition(false);
+    }, 1600);
   };
 
   if (showTransition && nextPlanet) {
@@ -172,7 +173,10 @@ const CountingVenus: React.FC = () => {
             lessonType="counting"
             videoUrl="https://www.youtube.com/embed/G8hLQFpq0rU?si=BcyEG-LomVzdDWL_"
             onFinish={() => setShowTransition(true)}
-            onBack={() => navigate('/planets')}
+            onBack={() => {
+              void completePlanet('venus');
+              navigate('/planets');
+            }}
             finishLabel={nextPlanet ? `Go to ${PLANET_META[nextPlanet].name}` : 'Continue'}
           />
         );

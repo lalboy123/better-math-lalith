@@ -60,11 +60,24 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     getActiveStudent()
   );
 
+  const resetLocalProgress = useCallback(() => {
+    setCurrentLesson(null);
+    setPlanetSteps({});
+    setCompletedPlanets(emptyCompleted());
+    setProgressPlanetId('sun');
+    setClassMaxPlanetId('sun');
+    setShowRocketTransition(false);
+  }, []);
+
   useEffect(() => {
-    const syncSession = () => setActiveSession(getActiveStudent());
+    const syncSession = () => {
+      const next = getActiveStudent();
+      setActiveSession(next);
+      if (!next) resetLocalProgress();
+    };
     window.addEventListener(SESSION_CHANGED, syncSession);
     return () => window.removeEventListener(SESSION_CHANGED, syncSession);
-  }, []);
+  }, [resetLocalProgress]);
 
   const hydrateFromStudent = useCallback((student: StudentState) => {
     const progressPlanet = getFurthestProgressPlanet(student);
@@ -100,11 +113,15 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const existing = clsSnap?.students?.[active.nickname];
       if (!existing) return;
 
-      await updateStudentState(active.classCode, {
-        ...existing,
-        planetSteps: { ...(existing.planetSteps ?? {}), [planetId]: step },
-        lastUpdated: Date.now(),
-      });
+      await updateStudentState(
+        active.classCode,
+        {
+          ...existing,
+          planetSteps: { ...(existing.planetSteps ?? {}), [planetId]: step },
+          lastUpdated: Date.now(),
+        },
+        active.nickname
+      );
     },
     [activeSession]
   );
@@ -144,14 +161,18 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (!existing) return;
 
-    await updateStudentState(active.classCode, {
-      ...existing,
-      planet: nextPlanet,
-      lesson: nextLesson,
-      completedPlanets: completedList,
-      planetSteps: { ...(existing.planetSteps ?? {}) },
-      lastUpdated: Date.now(),
-    });
+    await updateStudentState(
+      active.classCode,
+      {
+        ...existing,
+        planet: nextPlanet,
+        lesson: nextLesson,
+        completedPlanets: completedList,
+        planetSteps: { ...(existing.planetSteps ?? {}) },
+        lastUpdated: Date.now(),
+      },
+      active.nickname
+    );
   };
 
   const getOrderedSequence = () => {

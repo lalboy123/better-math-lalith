@@ -58,7 +58,8 @@ const SubtractionUranus: React.FC = () => {
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate('/lesson/subtraction/neptune');
-    }, 2500);
+      setShowRocketTransition(false);
+    }, 1600);
   };
 
   if (showTransition) {

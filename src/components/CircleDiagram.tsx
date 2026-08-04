@@ -56,8 +56,12 @@ const CircleDiagram: React.FC<Props> = ({ planets, size = 360, onSelect, selecte
             <g
               key={p.id}
               onClick={() => !isDisabled && onSelect?.(p)}
-              style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+              style={{
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                transition: 'opacity 0.25s ease, transform 0.25s ease',
+              }}
               opacity={isDisabled ? 0.35 : 1}
+              className={!isDisabled ? 'origin-center hover:opacity-100' : undefined}
             >
               <circle
                 cx={px}
@@ -66,6 +70,7 @@ const CircleDiagram: React.FC<Props> = ({ planets, size = 360, onSelect, selecte
                 fill={p.color || '#f3f4f6'}
                 stroke={isSelected ? '#fff' : isDisabled ? '#666' : '#e2e8f0'}
                 strokeWidth={isSelected ? 2.5 : 1}
+                style={{ transition: 'r 0.2s ease, stroke-width 0.2s ease' }}
               />
               <text
                 x={px}

@@ -163,7 +163,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
       <div className="flex flex-wrap gap-3 justify-center">
         {onBack && (
           <Button onClick={onBack} size="lg" variant="outline">
-            Back to Solar System
+            Finish &amp; Return to Planets
           </Button>
         )}
         <Button onClick={onFinish} size="lg">

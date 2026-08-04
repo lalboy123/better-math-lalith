@@ -51,7 +51,8 @@ const CountingMercury: React.FC = () => {
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate('/lesson/counting/venus');
-    }, 2500);
+      setShowRocketTransition(false);
+    }, 1600);
   };
 
   if (showTransition) {

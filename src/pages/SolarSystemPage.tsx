@@ -4,7 +4,7 @@ import { Lock, Rocket } from 'lucide-react';
 import { useGame } from '@/context/GameContext';
 import NavigationArrows from '@/components/NavigationArrows';
 import { subscribeToClass, Classroom } from '@/lib/classroom';
-import { getActiveStudent } from '@/lib/session';
+import { clearActiveStudent, getActiveStudent, getStudentDisplayName } from '@/lib/session';
 import {
   PLANET_ORDER,
   PLANET_META,
@@ -29,13 +29,16 @@ const SolarSystemPage: React.FC = () => {
     hydrateClassMax,
   } = useGame();
   const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [selecting, setSelecting] = useState(false);
 
   useEffect(() => {
     const active = getActiveStudent();
     if (!active) {
-      navigate('/');
+      navigate('/', { replace: true });
       return;
     }
+    setDisplayName(getStudentDisplayName(active));
     const { classCode, nickname } = active;
     const unsub = subscribeToClass(classCode, (data) => {
       setClassroom(data);
@@ -47,6 +50,11 @@ const SolarSystemPage: React.FC = () => {
     });
     return () => unsub();
   }, [navigate, hydrateFromStudent, hydrateClassMax]);
+
+  const handleSignOut = () => {
+    clearActiveStudent();
+    navigate('/', { replace: true });
+  };
 
   const classMax = classroom?.defaultStart?.planet ?? classMaxPlanetId ?? 'sun';
   const maxPlanetName = PLANET_META[classMax as PlanetId]?.name ?? 'Sun';
@@ -63,6 +71,7 @@ const SolarSystemPage: React.FC = () => {
   }, [completedPlanets]);
 
   const handlePlanetClick = (planetId: PlanetId) => {
+    if (selecting) return;
     const selectable = canSelectPlanet(planetId, {
       classMaxPlanetId: classMax,
       progressPlanetId,
@@ -72,26 +81,37 @@ const SolarSystemPage: React.FC = () => {
     const lesson = getLessonForPlanet(planetId);
     const isCompleted = completedPlanets[planetId];
     const savedStep = isCompleted ? 0 : getPlanetStep(planetId);
+    setSelecting(true);
     setPosition(planetId, lesson);
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate(getLessonRoute(planetId), {
         state: { initialStep: savedStep, replay: isCompleted },
       });
-    }, 1200);
+      setShowRocketTransition(false);
+      setSelecting(false);
+    }, 1400);
   };
 
   const orbitPlanets = PLANET_ORDER.filter((id) => id !== 'sun');
 
   return (
     <div className="min-h-screen bg-background subtle-stars flex flex-col items-center justify-center p-8 overflow-hidden">
-      <h1 className="text-3xl font-semibold text-foreground mb-2 animate-fade-in z-20 text-center">
-        Choose Your Destination
-      </h1>
-      <p className="text-muted-foreground mb-8 animate-fade-in z-20 text-center max-w-lg">
-        Your teacher has unlocked planets through <strong className="text-foreground">{maxPlanetName}</strong>.
-        Tap a planet to start or continue its lesson.
-      </p>
+      <div className="animate-fade-in z-20 text-center mb-8">
+        {displayName && (
+          <p className="text-sm text-muted-foreground mb-2">
+            Playing as <strong className="text-foreground">{displayName}</strong>
+          </p>
+        )}
+        <h1 className="text-3xl font-semibold text-foreground mb-2">
+          Choose Your Destination
+        </h1>
+        <p className="text-muted-foreground max-w-lg mx-auto">
+          Your teacher has unlocked planets through{' '}
+          <strong className="text-foreground">{maxPlanetName}</strong>. Tap a planet to start or
+          continue its lesson.
+        </p>
+      </div>
 
       <div className="relative w-full max-w-2xl aspect-square flex items-center justify-center mb-8">
         {orbitPlanets.map((id) => (
@@ -198,7 +218,7 @@ const SolarSystemPage: React.FC = () => {
       </div>
 
       <NavigationArrows
-        onBack={() => navigate('/')}
+        onBack={handleSignOut}
         showNext={false}
         backLabel="Sign Out"
       />

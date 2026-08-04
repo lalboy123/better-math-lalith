@@ -138,11 +138,14 @@ const SubtractionNeptune: React.FC = () => {
             lessonType="subtraction"
             videoUrl="https://www.youtube.com/embed/G8hLQFpq0rU?si=BcyEG-LomVzdDWL_"
             onFinish={() => {
-              completePlanet('neptune');
+              void completePlanet('neptune');
               navigate('/planets');
             }}
-            onBack={() => navigate('/planets')}
-            finishLabel="Return to Solar System"
+            onBack={() => {
+              void completePlanet('neptune');
+              navigate('/planets');
+            }}
+            finishLabel="Return to Planets"
           />
         );
 
