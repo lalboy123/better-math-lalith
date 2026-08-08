@@ -14,6 +14,7 @@ import {
   getLessonForPlanet,
   getLessonRoute,
   getInProgressPlanet,
+  getClassroomUnlockPlanet,
 } from '@/lib/planets';
 
 const PlanetSelectPage: React.FC = () => {
@@ -45,7 +46,8 @@ const PlanetSelectPage: React.FC = () => {
     const unsub = subscribeToClass(classCode, (data) => {
       setClassroom(data);
       if (!data) return;
-      hydrateClassMax(data.defaultStart?.planet);
+      const unlock = getClassroomUnlockPlanet(data);
+      if (unlock) hydrateClassMax(unlock);
       if (data.students?.[nickname]) {
         hydrateFromStudent(data.students[nickname]);
       }
@@ -58,7 +60,8 @@ const PlanetSelectPage: React.FC = () => {
     navigate('/', { replace: true });
   };
 
-  const classMax = classroom?.defaultStart?.planet ?? classMaxPlanetId ?? 'sun';
+  const classMax =
+    getClassroomUnlockPlanet(classroom) ?? classMaxPlanetId ?? 'sun';
   const completedList = useMemo(
     () => PLANET_ORDER.filter((id) => completedPlanets[id]),
     [completedPlanets]

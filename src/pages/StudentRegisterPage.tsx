@@ -8,6 +8,7 @@ import {
   nicknameKey,
   resolveClassCode,
 } from '@/lib/classroom';
+import { getClassroomUnlockPlanet } from '@/lib/planets';
 import { setActiveStudent } from '@/lib/session';
 import { useGame } from '@/context/GameContext';
 import AuthNavButton from '@/components/AuthNavButton';
@@ -55,7 +56,8 @@ const StudentRegisterPage: React.FC = () => {
       }
 
       const cls = await getClass(result.classCode);
-      hydrateClassMax(cls?.defaultStart?.planet);
+      const unlock = getClassroomUnlockPlanet(cls);
+      if (unlock) hydrateClassMax(unlock);
       hydrateFromStudent(result.student);
       setActiveStudent({
         classCode: result.classCode,

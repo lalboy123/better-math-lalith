@@ -3,7 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { Classroom, setClassDefaultStart, subscribeToClass } from '@/lib/classroom';
 import { clearActiveTeacher, getActiveTeacher, setActiveTeacher } from '@/lib/session';
-import { getLessonForPlanet, PLANET_META, type PlanetId } from '@/lib/planets';
+import {
+  getClassroomUnlockPlanet,
+  getLessonForPlanet,
+  PLANET_META,
+  type PlanetId,
+} from '@/lib/planets';
 import { Button } from '@/components/ui/button';
 
 const TeacherDashboard: React.FC = () => {
@@ -37,8 +42,9 @@ const TeacherDashboard: React.FC = () => {
           return;
         }
         setLoadError('');
-        if (data.defaultStart?.planet) {
-          setDefaultPlanet(data.defaultStart.planet);
+        const unlock = getClassroomUnlockPlanet(data);
+        if (unlock) {
+          setDefaultPlanet(unlock);
         }
       },
       () => {
@@ -120,10 +126,10 @@ const TeacherDashboard: React.FC = () => {
         )}
 
         <section className="mb-8 bg-card/95 p-6 rounded-2xl shadow border border-border backdrop-blur-sm">
-          <h2 className="text-xl font-semibold mb-2">Unlocked Planets</h2>
+          <h2 className="text-xl font-semibold mb-2">Class Start Level</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Students can pick any planet from the Sun through your selection. Changes save instantly
-            and update student devices live.
+            New and returning students with no progress begin at this planet (earlier planets are
+            unlocked too). Changes save instantly and update student devices live.
           </p>
           <div className="flex flex-wrap gap-4 items-center">
             <select

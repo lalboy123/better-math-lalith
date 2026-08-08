@@ -43,6 +43,39 @@ export const getPlanetIndex = (planetId: string): number => {
   return idx === -1 ? 0 : idx;
 };
 
+/** Normalize Firestore / UI planet ids (trim + lowercase). */
+export const normalizePlanetId = (planetId?: string | null): PlanetId | null => {
+  if (!planetId || typeof planetId !== 'string') return null;
+  const key = planetId.trim().toLowerCase();
+  return PLANET_ORDER.includes(key as PlanetId) ? (key as PlanetId) : null;
+};
+
+/**
+ * Teacher unlock / start planet from a classroom document.
+ * Supports defaultStart.planet and legacy defaultPlanet.
+ */
+export const getClassroomUnlockPlanet = (
+  cls?: {
+    defaultStart?: { planet?: string } | string | null;
+    defaultPlanet?: string | null;
+  } | null
+): PlanetId | null => {
+  if (!cls) return null;
+  if (typeof cls.defaultStart === 'string') {
+    return normalizePlanetId(cls.defaultStart);
+  }
+  return (
+    normalizePlanetId(cls.defaultStart?.planet) ??
+    normalizePlanetId(cls.defaultPlanet)
+  );
+};
+
+/** Planets before the teacher start level (treated as already cleared for new students). */
+export const planetsBefore = (planetId: PlanetId): PlanetId[] => {
+  const idx = getPlanetIndex(planetId);
+  return PLANET_ORDER.slice(0, idx);
+};
+
 export const getLessonForPlanet = (planetId: string): LessonType => {
   if (['earth', 'mars', 'jupiter'].includes(planetId)) return 'addition';
   if (['saturn', 'uranus', 'neptune'].includes(planetId)) return 'subtraction';
@@ -108,10 +141,21 @@ export const canSelectPlanet = (
   }
 ): boolean => {
   const index = getPlanetIndex(planetId);
-  const teacherMax = getClassMaxPlanetIndex(options.classMaxPlanetId ?? 'sun');
+  const teacherPlanet = normalizePlanetId(options.classMaxPlanetId) ?? 'sun';
+  const teacherMax = getPlanetIndex(teacherPlanet);
   const progressIndex = getPlanetIndex(options.progressPlanetId);
   const visibleMax = Math.max(teacherMax, progressIndex);
   return index <= visibleMax;
+};
+
+/** True when the student has not made real lesson progress yet. */
+export const isFreshStudent = (
+  student: Pick<StudentState, 'planet' | 'completedPlanets' | 'planetSteps'>
+): boolean => {
+  const hasCompleted = (student.completedPlanets?.length ?? 0) > 0;
+  const hasSteps = Object.values(student.planetSteps ?? {}).some((step) => step > 0);
+  const atSun = (normalizePlanetId(student.planet) ?? 'sun') === 'sun';
+  return atSun && !hasCompleted && !hasSteps;
 };
 
 export const getNextPlanet = (planetId: PlanetId): PlanetId | null => {

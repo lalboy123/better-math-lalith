@@ -1,6 +1,13 @@
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, type Unsubscribe } from 'firebase/firestore';
 import { db } from './firebase';
-import { getLessonForPlanet } from './planets';
+import {
+  getClassroomUnlockPlanet,
+  getLessonForPlanet,
+  isFreshStudent,
+  normalizePlanetId,
+  planetsBefore,
+  type PlanetId,
+} from './planets';
 
 export type LessonType = 'counting' | 'addition' | 'subtraction';
 
@@ -17,6 +24,8 @@ export interface Classroom {
   classCode: string;
   teacherCode: string;
   defaultStart?: { planet: string; lesson: LessonType };
+  /** Legacy field some older docs may still have */
+  defaultPlanet?: string;
   students: Record<string, StudentState>;
 }
 
@@ -111,6 +120,48 @@ export const verifyTeacherPin = async (
   return { ok: true, classCode: resolved, teacherCode: cls.teacherCode };
 };
 
+/** Place a brand-new student at the teacher start / unlock planet. */
+export const buildStudentAtClassStart = (
+  nickname: string,
+  cls: Classroom | null | undefined
+): StudentState => {
+  const startPlanet: PlanetId = getClassroomUnlockPlanet(cls) ?? 'sun';
+  return {
+    nickname,
+    planet: startPlanet,
+    lesson: getLessonForPlanet(startPlanet),
+    completedPlanets: planetsBefore(startPlanet),
+    planetSteps: {},
+    lastUpdated: Date.now(),
+  };
+};
+
+/**
+ * If a returning student never made progress, move them up to the current
+ * teacher start level so login respects dashboard unlock changes.
+ */
+export const applyClassStartIfNeeded = (
+  student: StudentState,
+  cls: Classroom | null | undefined
+): StudentState => {
+  const startPlanet = getClassroomUnlockPlanet(cls);
+  if (!startPlanet || !isFreshStudent(student)) return student;
+  if ((normalizePlanetId(student.planet) ?? 'sun') === startPlanet) {
+    return {
+      ...student,
+      lesson: getLessonForPlanet(startPlanet),
+      completedPlanets: planetsBefore(startPlanet),
+    };
+  }
+  return {
+    ...student,
+    planet: startPlanet,
+    lesson: getLessonForPlanet(startPlanet),
+    completedPlanets: planetsBefore(startPlanet),
+    lastUpdated: Date.now(),
+  };
+};
+
 export const registerStudent = async (
   classCode: string,
   nickname: string
@@ -118,17 +169,10 @@ export const registerStudent = async (
   const resolved = await resolveClassCode(classCode);
   if (!resolved) return null;
 
+  const cls = await getClassById(resolved);
   const displayName = normalizeLabel(nickname);
   const key = nicknameKey(displayName);
-
-  const newStudent: StudentState = {
-    nickname: displayName,
-    planet: 'sun',
-    lesson: 'counting',
-    completedPlanets: [],
-    planetSteps: {},
-    lastUpdated: Date.now(),
-  };
+  const newStudent = buildStudentAtClassStart(displayName, cls);
 
   await updateDoc(doc(db, 'classrooms', resolved), {
     [`students.${key}`]: newStudent,
@@ -151,9 +195,12 @@ export const updateStudentState = async (
 
 export const setClassDefaultStart = async (classCode: string, planet: string) => {
   const resolved = (await resolveClassCode(classCode)) ?? classCodeKey(classCode);
-  const lesson = getLessonForPlanet(planet);
+  const normalized = normalizePlanetId(planet) ?? 'sun';
+  const lesson = getLessonForPlanet(normalized);
   await updateDoc(doc(db, 'classrooms', resolved), {
-    defaultStart: { planet, lesson },
+    defaultStart: { planet: normalized, lesson },
+    // Keep legacy field in sync for older readers
+    defaultPlanet: normalized,
   });
 };
 

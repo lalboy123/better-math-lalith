@@ -14,6 +14,7 @@ import {
   getLessonForPlanet,
   SOLAR_ORBIT,
   getTopicDisplayName,
+  getClassroomUnlockPlanet,
 } from '@/lib/planets';
 
 const BASE_SIZE = 640; // design space that fits Neptune orbit (580) + labels
@@ -47,7 +48,8 @@ const SolarSystemPage: React.FC = () => {
     const unsub = subscribeToClass(classCode, (data) => {
       setClassroom(data);
       if (!data) return;
-      hydrateClassMax(data.defaultStart?.planet);
+      const unlock = getClassroomUnlockPlanet(data);
+      if (unlock) hydrateClassMax(unlock);
       if (data.students?.[nickname]) {
         hydrateFromStudent(data.students[nickname]);
       }
@@ -73,7 +75,8 @@ const SolarSystemPage: React.FC = () => {
     navigate('/', { replace: true });
   };
 
-  const classMax = classroom?.defaultStart?.planet ?? classMaxPlanetId ?? 'sun';
+  const classMax =
+    getClassroomUnlockPlanet(classroom) ?? classMaxPlanetId ?? 'sun';
   const maxPlanetName = PLANET_META[classMax as PlanetId]?.name ?? 'Sun';
 
   const maxOrbitRadius = useMemo(() => {

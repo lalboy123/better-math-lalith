@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
+  applyClassStartIfNeeded,
   findStudentKey,
   getClass,
   normalizeLabel,
   resolveClassCode,
+  updateStudentState,
 } from '@/lib/classroom';
+import { getClassroomUnlockPlanet } from '@/lib/planets';
 import { setActiveStudent } from '@/lib/session';
 import { useGame } from '@/context/GameContext';
 import AuthNavButton from '@/components/AuthNavButton';
@@ -50,12 +53,21 @@ const StudentLoginPage: React.FC = () => {
         return;
       }
 
-      hydrateClassMax(cls?.defaultStart?.planet);
-      hydrateFromStudent(student);
+      const unlock = getClassroomUnlockPlanet(cls);
+      const adjusted = applyClassStartIfNeeded(student, cls);
+      if (
+        adjusted.planet !== student.planet ||
+        (adjusted.completedPlanets?.length ?? 0) !== (student.completedPlanets?.length ?? 0)
+      ) {
+        await updateStudentState(resolved, adjusted, key);
+      }
+
+      if (unlock) hydrateClassMax(unlock);
+      hydrateFromStudent(adjusted);
       setActiveStudent({
         classCode: resolved,
         nickname: key,
-        displayName: student.nickname || name,
+        displayName: adjusted.nickname || name,
       });
 
       navigate(STUDENT_HUB_PATH, { replace: true });

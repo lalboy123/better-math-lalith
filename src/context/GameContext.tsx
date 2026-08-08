@@ -18,6 +18,8 @@ import {
   getPlanetIndex,
   buildCompletedMap,
   getFurthestProgressPlanet,
+  getClassroomUnlockPlanet,
+  normalizePlanetId,
 } from '@/lib/planets';
 
 interface GameContextType {
@@ -90,11 +92,10 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const hydrateClassMax = useCallback((maxPlanetId?: string) => {
-    setClassMaxPlanetId(
-      (maxPlanetId && PLANET_ORDER.includes(maxPlanetId as PlanetId)
-        ? maxPlanetId
-        : 'sun') as PlanetId
-    );
+    const normalized = normalizePlanetId(maxPlanetId);
+    // Never regress unlock to Sun when a snapshot omits defaultStart.
+    if (!normalized) return;
+    setClassMaxPlanetId(normalized);
   }, []);
 
   const getPlanetStep = useCallback(
@@ -131,7 +132,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const unsubscribe = subscribeToClass(activeSession.classCode, (cls) => {
       if (!cls) return;
-      hydrateClassMax(cls.defaultStart?.planet);
+      const unlock = getClassroomUnlockPlanet(cls);
+      if (unlock) hydrateClassMax(unlock);
       const student = cls.students?.[activeSession.nickname];
       if (student) hydrateFromStudent(student);
     });
