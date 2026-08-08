@@ -158,6 +158,20 @@ export const isFreshStudent = (
   return atSun && !hasCompleted && !hasSteps;
 };
 
+/**
+ * Planet shown on the teacher roster: furthest real progress, never below
+ * the class start level when the student is still behind that start.
+ */
+export const getTeacherVisiblePlanet = (
+  student: Pick<StudentState, 'planet' | 'completedPlanets' | 'planetSteps'>,
+  classUnlockPlanet?: string | null
+): PlanetId => {
+  const progress = getFurthestProgressPlanet(student);
+  const unlock = normalizePlanetId(classUnlockPlanet);
+  if (!unlock) return progress;
+  return getPlanetIndex(progress) >= getPlanetIndex(unlock) ? progress : unlock;
+};
+
 export const getNextPlanet = (planetId: PlanetId): PlanetId | null => {
   const index = getPlanetIndex(planetId);
   if (index >= PLANET_ORDER.length - 1) return null;

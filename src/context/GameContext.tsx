@@ -3,6 +3,7 @@ import {
   updateStudentState,
   subscribeToClass,
   getClass,
+  applyClassStartIfNeeded,
   LessonType,
   StudentState,
 } from '@/lib/classroom';
@@ -129,13 +130,31 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     if (!activeSession) return;
+    let writeInFlight = false;
 
     const unsubscribe = subscribeToClass(activeSession.classCode, (cls) => {
       if (!cls) return;
       const unlock = getClassroomUnlockPlanet(cls);
       if (unlock) hydrateClassMax(unlock);
       const student = cls.students?.[activeSession.nickname];
-      if (student) hydrateFromStudent(student);
+      if (!student) return;
+
+      const adjusted = applyClassStartIfNeeded(student, cls);
+      hydrateFromStudent(adjusted);
+
+      const needsWrite =
+        adjusted.planet !== student.planet ||
+        adjusted.lesson !== student.lesson ||
+        (adjusted.completedPlanets?.length ?? 0) !== (student.completedPlanets?.length ?? 0);
+
+      if (needsWrite && !writeInFlight) {
+        writeInFlight = true;
+        void updateStudentState(activeSession.classCode, adjusted, activeSession.nickname).finally(
+          () => {
+            writeInFlight = false;
+          }
+        );
+      }
     });
 
     return () => unsubscribe();

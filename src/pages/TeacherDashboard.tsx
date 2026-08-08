@@ -6,8 +6,8 @@ import { clearActiveTeacher, getActiveTeacher, setActiveTeacher } from '@/lib/se
 import {
   getClassroomUnlockPlanet,
   getLessonForPlanet,
+  getTeacherVisiblePlanet,
   PLANET_META,
-  type PlanetId,
 } from '@/lib/planets';
 import { Button } from '@/components/ui/button';
 
@@ -66,6 +66,7 @@ const TeacherDashboard: React.FC = () => {
 
   const derivedLesson = getLessonForPlanet(defaultPlanet);
   const teacherPin = cls?.teacherCode || getActiveTeacher()?.teacherCode;
+  const classUnlock = getClassroomUnlockPlanet(cls) ?? defaultPlanet;
 
   const handleSignOut = () => {
     clearActiveTeacher();
@@ -128,8 +129,8 @@ const TeacherDashboard: React.FC = () => {
         <section className="mb-8 bg-card/95 p-6 rounded-2xl shadow border border-border backdrop-blur-sm">
           <h2 className="text-xl font-semibold mb-2">Class Start Level</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            New and returning students with no progress begin at this planet (earlier planets are
-            unlocked too). Changes save instantly and update student devices live.
+            Students begin at this planet. Raising it updates the roster live so you see where each
+            student currently is.
           </p>
           <div className="flex flex-wrap gap-4 items-center">
             <select
@@ -173,7 +174,9 @@ const TeacherDashboard: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {students.map(([key, s]) => {
-                const planetName = PLANET_META[s.planet as PlanetId]?.name ?? s.planet;
+                const currentPlanet = getTeacherVisiblePlanet(s, classUnlock);
+                const planetName = PLANET_META[currentPlanet].name;
+                const lesson = getLessonForPlanet(currentPlanet);
                 return (
                   <div
                     key={key}
@@ -181,7 +184,7 @@ const TeacherDashboard: React.FC = () => {
                   >
                     <div className="text-lg font-bold text-foreground">{s.nickname}</div>
                     <div className="text-sm font-medium text-sky-300 mt-1">
-                      {planetName} — {s.lesson}
+                      {planetName} — {lesson}
                     </div>
                   </div>
                 );

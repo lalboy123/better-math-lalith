@@ -2,8 +2,9 @@ import { doc, getDoc, setDoc, updateDoc, onSnapshot, type Unsubscribe } from 'fi
 import { db } from './firebase';
 import {
   getClassroomUnlockPlanet,
+  getFurthestProgressPlanet,
   getLessonForPlanet,
-  isFreshStudent,
+  getPlanetIndex,
   normalizePlanetId,
   planetsBefore,
   type PlanetId,
@@ -137,29 +138,77 @@ export const buildStudentAtClassStart = (
 };
 
 /**
- * If a returning student never made progress, move them up to the current
- * teacher start level so login respects dashboard unlock changes.
+ * Move a student up to the class start level when they are still behind it.
+ * Keeps any existing completed planets / steps; advances planet + lesson for
+ * accurate teacher roster and hub unlock.
  */
 export const applyClassStartIfNeeded = (
   student: StudentState,
   cls: Classroom | null | undefined
 ): StudentState => {
   const startPlanet = getClassroomUnlockPlanet(cls);
-  if (!startPlanet || !isFreshStudent(student)) return student;
-  if ((normalizePlanetId(student.planet) ?? 'sun') === startPlanet) {
+  if (!startPlanet) return student;
+
+  const progress = getFurthestProgressPlanet(student);
+  if (getPlanetIndex(progress) >= getPlanetIndex(startPlanet)) {
+    // Still ensure planet/lesson fields match furthest progress for the roster.
+    const lesson = getLessonForPlanet(progress);
+    if (student.planet === progress && student.lesson === lesson) return student;
     return {
       ...student,
-      lesson: getLessonForPlanet(startPlanet),
-      completedPlanets: planetsBefore(startPlanet),
+      planet: progress,
+      lesson,
+      lastUpdated: Date.now(),
     };
   }
+
+  const completed = new Set([
+    ...(student.completedPlanets ?? []),
+    ...planetsBefore(startPlanet),
+  ]);
+
   return {
     ...student,
     planet: startPlanet,
     lesson: getLessonForPlanet(startPlanet),
-    completedPlanets: planetsBefore(startPlanet),
+    completedPlanets: Array.from(completed),
     lastUpdated: Date.now(),
   };
+};
+
+/** Persist class-start bumps for every student still behind the new start. */
+export const syncStudentsToClassStart = async (
+  classCode: string,
+  startPlanet: string
+): Promise<number> => {
+  const resolved = (await resolveClassCode(classCode)) ?? classCodeKey(classCode);
+  const cls = await getClassById(resolved);
+  if (!cls?.students) return 0;
+
+  const normalized = normalizePlanetId(startPlanet) ?? 'sun';
+  const pretendClass: Classroom = {
+    ...cls,
+    defaultStart: { planet: normalized, lesson: getLessonForPlanet(normalized) },
+    defaultPlanet: normalized,
+  };
+
+  const payload: Record<string, StudentState> = {};
+  for (const [key, student] of Object.entries(cls.students)) {
+    const next = applyClassStartIfNeeded(student, pretendClass);
+    if (
+      next.planet !== student.planet ||
+      next.lesson !== student.lesson ||
+      (next.completedPlanets?.length ?? 0) !== (student.completedPlanets?.length ?? 0)
+    ) {
+      payload[`students.${key}`] = next;
+    }
+  }
+
+  const count = Object.keys(payload).length;
+  if (count === 0) return 0;
+
+  await updateDoc(doc(db, 'classrooms', resolved), payload);
+  return count;
 };
 
 export const registerStudent = async (
@@ -202,6 +251,8 @@ export const setClassDefaultStart = async (classCode: string, planet: string) =>
     // Keep legacy field in sync for older readers
     defaultPlanet: normalized,
   });
+  // Advance roster records so teachers see the correct current planet live.
+  await syncStudentsToClassStart(resolved, normalized);
 };
 
 export const subscribeToClass = (
