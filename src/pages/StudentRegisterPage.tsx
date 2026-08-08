@@ -9,13 +9,13 @@ import {
   resolveClassCode,
 } from '@/lib/classroom';
 import { getClassroomUnlockPlanet } from '@/lib/planets';
-import { setActiveStudent } from '@/lib/session';
+import { getLastClassCode, setActiveStudent } from '@/lib/session';
 import { useGame } from '@/context/GameContext';
 import AuthNavButton from '@/components/AuthNavButton';
 import { STUDENT_HUB_PATH } from '@/lib/studentHub';
 
 const StudentRegisterPage: React.FC = () => {
-  const [classCode, setClassCode] = useState('');
+  const [classCode, setClassCode] = useState(getLastClassCode());
   const [nickname, setNickname] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

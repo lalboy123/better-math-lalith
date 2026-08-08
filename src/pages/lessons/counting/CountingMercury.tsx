@@ -10,6 +10,7 @@ import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
 import LessonCelebration from '@/components/LessonCelebration';
+import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
@@ -78,12 +79,20 @@ const CountingMercury: React.FC = () => {
               Help Fill the Basket!
             </h2>
             <div className="bg-card rounded-xl p-6 border border-border mb-8 max-w-lg">
-              <p className="text-lg text-foreground">
-                Jo needs <span className="font-bold text-primary text-xl">{targetCount} apples</span> for a pie.
-              </p>
-              <p className="text-muted-foreground mt-2">
-                Can you put the right amount?
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-left flex-1">
+                  <p className="text-lg text-foreground">
+                    Jo needs <span className="font-bold text-primary text-xl">{targetCount} apples</span> for a pie.
+                  </p>
+                  <p className="text-muted-foreground mt-2">
+                    Can you put the right amount?
+                  </p>
+                </div>
+                <ReadAloudButton
+                  text={`Jo needs ${targetCount} apples for a pie. Can you put the right amount?`}
+                  className="shrink-0"
+                />
+              </div>
             </div>
             
             <div className="flex flex-col items-center gap-6">

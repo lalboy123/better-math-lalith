@@ -15,8 +15,9 @@ const Apple: React.FC<AppleProps> = ({ onClick, className = '', size = 'md' }) =
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`${sizeClasses[size]} transition-transform hover:scale-110 cursor-pointer ${className}`}
+      className={`${sizeClasses[size]} rounded-lg transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className}`}
       aria-label="Apple"
     >
       <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">

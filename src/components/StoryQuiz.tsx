@@ -1,6 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Star, Pencil, Rocket } from 'lucide-react';
+import {
+  ChevronRight,
+  Star,
+  Rocket,
+  Apple,
+  Shirt,
+  Circle,
+  Gauge,
+  AppWindow,
+  type LucideIcon,
+} from 'lucide-react';
+import GuidedPractice from '@/components/GuidedPractice';
+import NumberPad from '@/components/NumberPad';
+import ReadAloudButton from '@/components/ReadAloudButton';
 
 interface Question {
   story: string;
@@ -9,6 +22,10 @@ interface Question {
   answer: number;
   num1?: number;
   num2?: number;
+  /** Icon shown for counting questions so the picture matches the prompt. */
+  icon?: LucideIcon;
+  /** Whether the icon should be filled (looks nicer for stars/buttons). */
+  iconFill?: boolean;
 }
 
 interface StoryQuizProps {
@@ -23,6 +40,8 @@ const countingQuestions: Question[] = [
     options: [4, 5, 6, 3],
     answer: 5,
     num1: 5,
+    icon: Star,
+    iconFill: true,
   },
   {
     story: 'Luna looks at her food.',
@@ -30,6 +49,7 @@ const countingQuestions: Question[] = [
     options: [6, 7, 8, 5],
     answer: 7,
     num1: 7,
+    icon: Apple,
   },
   {
     story: 'She gets her suits.',
@@ -37,6 +57,7 @@ const countingQuestions: Question[] = [
     options: [2, 3, 4, 1],
     answer: 3,
     num1: 3,
+    icon: Shirt,
   },
   {
     story: 'Luna sees buttons on the control panel.',
@@ -44,6 +65,8 @@ const countingQuestions: Question[] = [
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 6,
+    icon: Circle,
+    iconFill: true,
   },
   {
     story: 'She checks the power meters.',
@@ -51,6 +74,7 @@ const countingQuestions: Question[] = [
     options: [3, 4, 5, 2],
     answer: 4,
     num1: 4,
+    icon: Gauge,
   },
   {
     story: 'Luna counts windows on the ship.',
@@ -58,6 +82,7 @@ const countingQuestions: Question[] = [
     options: [7, 8, 9, 6],
     answer: 8,
     num1: 8,
+    icon: AppWindow,
   },
   {
     story: 'Time to go! She sees stars outside.',
@@ -65,6 +90,8 @@ const countingQuestions: Question[] = [
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 6,
+    icon: Star,
+    iconFill: true,
   },
   {
     story: 'Luna made it! She is happy.',
@@ -72,13 +99,14 @@ const countingQuestions: Question[] = [
     options: [1, 2, 3, 4],
     answer: 2,
     num1: 2,
+    icon: Rocket,
   },
 ];
 
 const additionQuestions: Question[] = [
   {
     story: "Max likes to paint. He has brushes.",
-    question: "Max has 2 brushes. He gets 3 more. How many now? 2 + 3 = ?",
+    question: "Max has 2 brushes. He gets 3 more. How many now?",
     options: [4, 5, 6, 3],
     answer: 5,
     num1: 2,
@@ -86,7 +114,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "Max has paint jars.",
-    question: "He has 3 red and 2 blue. How many in all? 3 + 2 = ?",
+    question: "He has 3 red and 2 blue. How many in all?",
     options: [4, 5, 6, 3],
     answer: 5,
     num1: 3,
@@ -94,7 +122,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "He looks at his papers.",
-    question: "2 big papers and 4 small papers. How many? 2 + 4 = ?",
+    question: "2 big papers and 4 small papers. How many?",
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 2,
@@ -102,7 +130,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "Friends come to paint!",
-    question: "4 kids here. 2 more come. How many kids? 4 + 2 = ?",
+    question: "4 kids here. 2 more come. How many kids?",
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 4,
@@ -110,7 +138,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "Time for a snack!",
-    question: "Max has 3 grapes. He gets 4 more. How many? 3 + 4 = ?",
+    question: "Max has 3 grapes. He gets 4 more. How many?",
     options: [6, 7, 8, 5],
     answer: 7,
     num1: 3,
@@ -118,7 +146,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "Max finds rocks.",
-    question: "He has 1 rock. He finds 5 more. How many? 1 + 5 = ?",
+    question: "He has 1 rock. He finds 5 more. How many?",
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 1,
@@ -126,7 +154,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "He draws with crayons.",
-    question: "2 crayons here and 2 more there. How many? 2 + 2 = ?",
+    question: "2 crayons here and 2 more there. How many?",
     options: [3, 4, 5, 2],
     answer: 4,
     num1: 2,
@@ -134,7 +162,7 @@ const additionQuestions: Question[] = [
   },
   {
     story: "Max is done! He made art.",
-    question: "He made 3 drawings today and 3 yesterday. How many? 3 + 3 = ?",
+    question: "He made 3 drawings today and 3 yesterday. How many?",
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 3,
@@ -145,7 +173,7 @@ const additionQuestions: Question[] = [
 const subtractionQuestions: Question[] = [
   {
     story: "Zara has pencils for class.",
-    question: "She has 5 pencils. She gives 2 away. How many left? 5 - 2 = ?",
+    question: "She has 5 pencils. She gives 2 away. How many left?",
     options: [2, 3, 4, 1],
     answer: 3,
     num1: 5,
@@ -153,7 +181,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "The kids need erasers.",
-    question: "There are 6 erasers. 2 kids take one each. How many left? 6 - 2 = ?",
+    question: "There are 6 erasers. 2 kids take one each. How many left?",
     options: [3, 4, 5, 2],
     answer: 4,
     num1: 6,
@@ -161,7 +189,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "Lunch time! Cookies for all.",
-    question: "There are 7 cookies. 3 get eaten. How many left? 7 - 3 = ?",
+    question: "There are 7 cookies. 3 get eaten. How many left?",
     options: [3, 4, 5, 2],
     answer: 4,
     num1: 7,
@@ -169,7 +197,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "Books on the shelf.",
-    question: "6 books are here. 1 is taken. How many now? 6 - 1 = ?",
+    question: "6 books are here. 1 is taken. How many now?",
     options: [4, 5, 6, 3],
     answer: 5,
     num1: 6,
@@ -177,7 +205,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "Zara has stickers.",
-    question: "She has 8 stickers. She gives 4 away. How many left? 8 - 4 = ?",
+    question: "She has 8 stickers. She gives 4 away. How many left?",
     options: [3, 4, 5, 2],
     answer: 4,
     num1: 8,
@@ -185,7 +213,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "Apples in a bowl.",
-    question: "5 apples. 2 are eaten. How many left? 5 - 2 = ?",
+    question: "5 apples. 2 are eaten. How many left?",
     options: [2, 3, 4, 1],
     answer: 3,
     num1: 5,
@@ -193,7 +221,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "Kids go home.",
-    question: "7 kids were here. 2 left. How many still here? 7 - 2 = ?",
+    question: "7 kids were here. 2 left. How many still here?",
     options: [4, 5, 6, 3],
     answer: 5,
     num1: 7,
@@ -201,7 +229,7 @@ const subtractionQuestions: Question[] = [
   },
   {
     story: "Good day at school!",
-    question: "9 crayons. 3 are lost. How many left? 9 - 3 = ?",
+    question: "9 crayons. 3 are lost. How many left?",
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 9,
@@ -220,125 +248,29 @@ const affirmations = [
   "Perfect!"
 ];
 
-// Pencil animation component for wrong answers
-const PencilAnimation: React.FC<{
-  lessonType: 'counting' | 'addition' | 'subtraction';
-  num1: number;
-  num2?: number;
-  onClose: () => void;
-}> = ({ lessonType, num1, num2 = 0, onClose }) => {
-  const [phase, setPhase] = useState<'start' | 'action' | 'end'>('start');
-  
-  useEffect(() => {
-    const timer1 = setTimeout(() => setPhase('action'), 1000);
-    const timer2 = setTimeout(() => setPhase('end'), 2000);
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+interface EquationChip {
+  id: number;
+  value: number;
+}
 
-  if (lessonType === 'counting') {
-    return (
-      <div className="fixed inset-0 bg-background/90 z-50 flex items-center justify-center animate-fade-in">
-        <div className="bg-card rounded-2xl p-8 border border-border max-w-md text-center relative">
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-          <p className="text-xl font-semibold mb-6 text-foreground">
-            Let's count again!
-          </p>
-          <div className="flex gap-3 flex-wrap justify-center mb-4">
-            {Array.from({ length: num1 }).map((_, i) => (
-              <div 
-                key={i}
-                className="w-10 h-10 flex items-center justify-center animate-scale-in"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <Pencil className="w-8 h-8 text-primary" />
-              </div>
-            ))}
-          </div>
-          <p className="text-3xl font-bold text-primary">{num1} pencils</p>
-        </div>
-      </div>
-    );
+/** Build tappable number chips: the two problem numbers plus two distractors. */
+const buildEquationChips = (question: Question): EquationChip[] => {
+  const values = [question.num1!, question.num2!];
+  const candidates = [
+    question.answer,
+    question.num1! + 1,
+    question.num2! + 2,
+    9, 8, 1, 7,
+  ];
+  for (const candidate of candidates) {
+    if (values.length >= 4) break;
+    if (candidate >= 0 && candidate <= 9 && !values.includes(candidate)) {
+      values.push(candidate);
+    }
   }
-
-  if (lessonType === 'addition') {
-    return (
-      <div className="fixed inset-0 bg-background/90 z-50 flex items-center justify-center animate-fade-in">
-        <div className="bg-card rounded-2xl p-8 border border-border max-w-md text-center relative">
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-          <p className="text-xl font-semibold mb-6 text-foreground">
-            Watch how we add!
-          </p>
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div className="flex gap-1">
-              {Array.from({ length: num1 }).map((_, i) => (
-                <Pencil key={i} className="w-6 h-6 text-primary" />
-              ))}
-            </div>
-            <span className="text-2xl font-bold text-primary">+</span>
-            <div className={`flex gap-1 transition-all duration-1000 ${
-              phase === 'start' ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
-            }`}>
-              {Array.from({ length: num2 }).map((_, i) => (
-                <Pencil key={i} className="w-6 h-6 text-accent" />
-              ))}
-            </div>
-          </div>
-          <p className="text-3xl font-bold text-primary">
-            {num1} + {num2} = {num1 + num2}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Subtraction
-  return (
-    <div className="fixed inset-0 bg-background/90 z-50 flex items-center justify-center animate-fade-in">
-      <div className="bg-card rounded-2xl p-8 border border-border max-w-md text-center relative">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Close"
-        >
-          ✕
-        </button>
-        <p className="text-xl font-semibold mb-6 text-foreground">
-          Watch how we subtract!
-        </p>
-        <div className="flex gap-2 flex-wrap justify-center mb-4">
-          {Array.from({ length: num1 }).map((_, i) => (
-            <Pencil 
-              key={i} 
-              className={`w-6 h-6 transition-all duration-1000 ${
-                phase !== 'start' && i >= num1 - num2 
-                  ? 'opacity-30 scale-75 line-through' 
-                  : 'text-primary'
-              }`}
-            />
-          ))}
-        </div>
-        <p className="text-3xl font-bold text-primary">
-          {num1} - {num2} = {num1 - num2}
-        </p>
-      </div>
-    </div>
-  );
+  return values
+    .map((value, id) => ({ id, value }))
+    .sort(() => Math.random() - 0.5);
 };
 
 const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
@@ -348,24 +280,91 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     ? additionQuestions 
     : subtractionQuestions;
 
+  const needsEquation = lessonType !== 'counting';
+  const operator = lessonType === 'subtraction' ? '−' : '+';
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [typedAnswer, setTypedAnswer] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [stars, setStars] = useState<boolean[]>(Array(8).fill(false));
   const [wrongTopics, setWrongTopics] = useState<string[]>([]);
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [currentAffirmation, setCurrentAffirmation] = useState('');
   const [wrongAttempts, setWrongAttempts] = useState(0);
-  const [showPencilAnimation, setShowPencilAnimation] = useState(false);
+  const [showGuidedPractice, setShowGuidedPractice] = useState(false);
   const [showRocketLaunch, setShowRocketLaunch] = useState(false);
+
+  // Equation-building stage (addition/subtraction only)
+  const [stage, setStage] = useState<'equation' | 'solve'>(needsEquation ? 'equation' : 'solve');
+  const [slots, setSlots] = useState<(number | null)[]>([null, null]);
+  const [equationChecked, setEquationChecked] = useState(false);
+  const [equationCorrect, setEquationCorrect] = useState(false);
+  const [equationAttempts, setEquationAttempts] = useState(0);
 
   const question = questions[currentQuestion];
 
+  // Every 3rd question is open-ended: the student types the number instead of picking.
+  const isOpenEnded = currentQuestion % 3 === 2;
+
+  const chips = useMemo(
+    () => (needsEquation ? buildEquationChips(question) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentQuestion, needsEquation]
+  );
+
+  const chipValue = (chipId: number | null) =>
+    chipId === null ? null : chips.find(c => c.id === chipId)?.value ?? null;
+
+  const placeChip = (chip: EquationChip) => {
+    if (equationChecked && equationCorrect) return;
+    if (slots.includes(chip.id)) return;
+    const emptyIndex = slots.indexOf(null);
+    if (emptyIndex === -1) return;
+    setSlots(prev => prev.map((s, i) => (i === emptyIndex ? chip.id : s)));
+    setEquationChecked(false);
+  };
+
+  const clearSlot = (index: number) => {
+    if (equationChecked && equationCorrect) return;
+    setSlots(prev => prev.map((s, i) => (i === index ? null : s)));
+    setEquationChecked(false);
+  };
+
+  const checkEquation = () => {
+    const v1 = chipValue(slots[0]);
+    const v2 = chipValue(slots[1]);
+    if (v1 === null || v2 === null) return;
+    const correct =
+      lessonType === 'addition'
+        ? (v1 === question.num1 && v2 === question.num2) ||
+          (v1 === question.num2 && v2 === question.num1)
+        : v1 === question.num1 && v2 === question.num2;
+    setEquationChecked(true);
+    setEquationCorrect(correct);
+    if (!correct) {
+      setEquationAttempts(prev => prev + 1);
+      if (!wrongTopics.includes(lessonType)) {
+        setWrongTopics(prev => [...prev, lessonType]);
+      }
+    }
+  };
+
+  const retryEquation = () => {
+    setSlots([null, null]);
+    setEquationChecked(false);
+    setEquationCorrect(false);
+  };
+
+  const effectiveAnswer = isOpenEnded
+    ? (typedAnswer === '' ? null : parseInt(typedAnswer, 10))
+    : selectedAnswer;
+
   const checkAnswer = () => {
     setIsChecked(true);
-    const isCorrect = selectedAnswer === question.answer;
+    const isAnswerCorrect = effectiveAnswer === question.answer;
     
-    if (isCorrect) {
+    if (isAnswerCorrect) {
       // Award star even if they got it right on retry
       const newStars = [...stars];
       newStars[currentQuestion] = true;
@@ -377,13 +376,17 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
         setWrongTopics(prev => [...prev, lessonType]);
       }
       setWrongAttempts(prev => prev + 1);
-      // Show pencil animation for wrong answer
-      setShowPencilAnimation(true);
+      // Open the interactive guided practice for a wrong answer
+      setShowGuidedPractice(true);
     }
   };
 
-  const handlePencilAnimationClose = () => {
-    setShowPencilAnimation(false);
+  const handleGuidedPracticeClose = () => {
+    setShowGuidedPractice(false);
+    // Let the student try the question again right away
+    setSelectedAnswer(null);
+    setTypedAnswer('');
+    setIsChecked(false);
   };
 
   const nextQuestion = () => {
@@ -393,7 +396,13 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
       setSelectedAnswer(null);
+      setTypedAnswer('');
       setIsChecked(false);
+      setStage(needsEquation ? 'equation' : 'solve');
+      setSlots([null, null]);
+      setEquationChecked(false);
+      setEquationCorrect(false);
+      setEquationAttempts(0);
     } else {
       const score = stars.filter(Boolean).length;
       // Show rocket launch animation before completing
@@ -406,10 +415,11 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
 
   const retryQuestion = () => {
     setSelectedAnswer(null);
+    setTypedAnswer('');
     setIsChecked(false);
   };
 
-  const isCorrect = selectedAnswer === question.answer;
+  const isCorrect = effectiveAnswer === question.answer;
 
   const starsEarned = stars.filter(Boolean).length;
   const progressPercent = (starsEarned / 8) * 100;
@@ -428,10 +438,249 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     );
   }
 
+  const CountIcon = question.icon ?? Star;
+  const countingStars = lessonType === 'counting' && question.num1 ? (
+    <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-xs mx-auto">
+      {Array.from({ length: question.num1 }).map((_, i) => (
+        <span
+          key={i}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/25 text-primary"
+        >
+          <CountIcon className={`h-4 w-4 ${question.iconFill ? 'fill-current' : ''}`} />
+        </span>
+      ))}
+    </div>
+  ) : null;
+
+  const renderEquationStage = () => (
+    <div className="bg-card rounded-xl p-6 border border-border mb-5 animate-fade-in">
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full inline-block">
+          Step 1: Build the equation
+        </span>
+        <ReadAloudButton text={question.question} />
+      </div>
+
+      <p className="text-xl text-foreground mb-4">
+        {question.question}
+      </p>
+
+      <p className="text-sm text-muted-foreground mb-6">
+        Use the numbers from the story to set up the problem!
+      </p>
+
+      {/* Equation slots */}
+      <div className="flex items-center justify-center gap-3 mb-8">
+        {slots.map((chipId, i) => (
+          <React.Fragment key={i}>
+            {i === 1 && <span className="text-3xl font-bold text-primary">{operator}</span>}
+            <button
+              type="button"
+              onClick={() => clearSlot(i)}
+              disabled={chipId === null}
+              aria-label={chipId === null ? 'Empty number slot' : `Slot with ${chipValue(chipId)} - tap to remove`}
+              className={`w-16 h-16 rounded-xl text-3xl font-bold flex items-center justify-center transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                chipId !== null
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/80 active:scale-95 animate-count-pop'
+                  : 'border-2 border-dashed border-muted-foreground/50 text-muted-foreground'
+              }`}
+            >
+              {chipId !== null ? chipValue(chipId) : '_'}
+            </button>
+          </React.Fragment>
+        ))}
+        <span className="text-3xl font-bold text-muted-foreground">=</span>
+        <div className="w-16 h-16 rounded-xl border-2 border-dashed border-muted-foreground/50 text-3xl font-bold flex items-center justify-center text-muted-foreground">
+          ?
+        </div>
+      </div>
+
+      {/* Number chips */}
+      <div className="flex justify-center gap-3 flex-wrap mb-6">
+        {chips.map(chip => {
+          const used = slots.includes(chip.id);
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => placeChip(chip)}
+              disabled={used || (equationChecked && equationCorrect)}
+              className={`w-14 h-14 rounded-xl text-2xl font-bold border flex items-center justify-center transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                used
+                  ? 'opacity-30 border-border bg-muted text-muted-foreground'
+                  : 'border-border bg-card text-foreground hover:border-primary hover:scale-110 active:scale-95'
+              }`}
+            >
+              {chip.value}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Equation feedback */}
+      {equationChecked && equationCorrect && (
+        <div className="text-center animate-fade-in space-y-4">
+          <p className="text-xl font-semibold text-success">
+            You built the equation! {chipValue(slots[0])} {operator} {chipValue(slots[1])} = ?
+          </p>
+          <Button onClick={() => setStage('solve')} size="lg">
+            Now Solve It
+            <ChevronRight className="w-5 h-5 ml-1" />
+          </Button>
+        </div>
+      )}
+
+      {equationChecked && !equationCorrect && (
+        <div className="text-center animate-fade-in space-y-4">
+          <p className="text-lg text-destructive font-semibold">
+            Not quite! Look at the story again.
+          </p>
+          {equationAttempts >= 2 && (
+            <p className="text-muted-foreground">
+              Hint: the story says <span className="font-bold text-primary">{question.num1} {operator} {question.num2}</span>
+            </p>
+          )}
+          <Button onClick={retryEquation} variant="outline" size="lg">
+            Try Again
+          </Button>
+        </div>
+      )}
+
+      {!equationChecked && (
+        <div className="text-center">
+          <Button
+            onClick={checkEquation}
+            size="lg"
+            disabled={slots.some(s => s === null)}
+          >
+            Check Equation
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderSolveStage = () => (
+    <div className="animate-fade-in">
+      {/* Question */}
+      <div className="bg-card rounded-xl p-6 border border-border mb-5">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full inline-block">
+            {needsEquation ? 'Step 2: Solve it' : `${currentQuestion + 1} of ${questions.length}`}
+          </span>
+          <ReadAloudButton text={question.question} />
+        </div>
+        
+        {needsEquation && (
+          <p className="text-3xl font-bold text-primary text-center mb-6">
+            {question.num1} {operator} {question.num2} = ?
+          </p>
+        )}
+
+        <p className="text-xl text-foreground mb-4">{question.question}</p>
+
+        {countingStars}
+
+        {/* Answer input: number pad for open-ended, buttons otherwise */}
+        {isOpenEnded ? (
+          <div>
+            <p className="text-sm text-muted-foreground mb-4 text-center">
+              Type your answer!
+            </p>
+            <NumberPad
+              value={typedAnswer}
+              onChange={setTypedAnswer}
+              disabled={isChecked}
+            />
+            {isChecked && (
+              <p className={`text-center mt-4 text-xl font-semibold ${isCorrect ? 'text-success' : 'text-destructive'}`}>
+                {isCorrect ? 'Correct!' : 'Not quite!'}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {question.options.map((option) => (
+              <Button
+                key={option}
+                onClick={() => !isChecked && setSelectedAnswer(option)}
+                variant={
+                  isChecked
+                    ? option === question.answer
+                      ? 'default'
+                      : option === selectedAnswer
+                      ? 'destructive'
+                      : 'outline'
+                    : selectedAnswer === option
+                    ? 'default'
+                    : 'outline'
+                }
+                className={`text-2xl py-7 transition-all duration-300 active:scale-95 ${
+                  isChecked && option === question.answer
+                    ? 'bg-success hover:bg-success'
+                    : ''
+                }`}
+                disabled={isChecked}
+              >
+                {option}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Affirmation */}
+      {showAffirmation && (
+        <div className="text-center mb-5 animate-fade-in">
+          <p className="text-2xl font-semibold text-success">
+            {currentAffirmation}
+          </p>
+        </div>
+      )}
+
+      {/* Feedback for wrong answer - only show correct answer on second wrong attempt */}
+      {wrongAttempts >= 2 && !showGuidedPractice && !(isChecked && isCorrect) && (
+        <div className="text-center mb-5 animate-fade-in">
+          <p className="text-lg text-muted-foreground">
+            The answer is <span className="font-bold text-success">{question.answer}</span>
+          </p>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex justify-center gap-4">
+        {!isChecked && effectiveAnswer !== null && (
+          <Button onClick={checkAnswer} size="lg">
+            Check
+          </Button>
+        )}
+        
+        {isChecked && !isCorrect && !showGuidedPractice && (
+          <Button onClick={retryQuestion} variant="outline" size="lg">
+            Try Again
+          </Button>
+        )}
+        
+        {isChecked && isCorrect && (
+          <Button onClick={nextQuestion} size="lg">
+            {currentQuestion < questions.length - 1 ? (
+              <>
+                Next
+                <ChevronRight className="w-5 h-5 ml-1" />
+              </>
+            ) : (
+              'Done'
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full max-w-xl mx-auto animate-fade-in">
-      {/* Progress Bar - Far Right Edge */}
-      <div className="fixed right-0 top-16 bottom-16 w-8 flex flex-col items-center z-10">
+      {/* Progress Bar - Far Right Edge (decorative, must not intercept clicks) */}
+      <div className="fixed right-0 top-16 bottom-16 w-8 flex flex-col items-center z-10 pointer-events-none">
         {/* Stars count */}
         <div className="flex flex-col items-center gap-0.5 mb-2">
           <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
@@ -463,117 +712,27 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
         ))}
       </div>
 
-      {/* Story text */}
-      <div className="bg-card/50 rounded-xl p-5 mb-5 border border-border">
-        <p className="text-lg text-foreground leading-relaxed">
-          {question.story}
-        </p>
-      </div>
-
-      {/* Question */}
-      <div className="bg-card rounded-xl p-6 border border-border mb-5">
-        <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full mb-4 inline-block">
-          {currentQuestion + 1} of {questions.length}
-        </span>
-        
-        <p className="text-xl text-foreground mb-4">{question.question}</p>
-
-        {lessonType === 'counting' && question.num1 ? (
-          <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-xs mx-auto">
-            {Array.from({ length: question.num1 }).map((_, i) => (
-              <span
-                key={i}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/25 text-primary"
-              >
-                <Star className="h-4 w-4 fill-current" />
-              </span>
-            ))}
+      <div key={currentQuestion} className="animate-fade-in">
+        {/* Story text */}
+        <div className="bg-card/50 rounded-xl p-5 mb-5 border border-border">
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-lg text-foreground leading-relaxed flex-1">
+              {question.story}
+            </p>
+            <ReadAloudButton text={`${question.story} ${question.question}`} className="shrink-0" />
           </div>
-        ) : null}
-
-        {/* Options */}
-        <div className="grid grid-cols-2 gap-3">
-          {question.options.map((option) => (
-            <Button
-              key={option}
-              onClick={() => !isChecked && setSelectedAnswer(option)}
-              variant={
-                isChecked
-                  ? option === question.answer
-                    ? 'default'
-                    : option === selectedAnswer
-                    ? 'destructive'
-                    : 'outline'
-                  : selectedAnswer === option
-                  ? 'default'
-                  : 'outline'
-              }
-              className={`text-2xl py-7 transition-all duration-300 ${
-                isChecked && option === question.answer
-                  ? 'bg-success hover:bg-success'
-                  : ''
-              }`}
-              disabled={isChecked}
-            >
-              {option}
-            </Button>
-          ))}
         </div>
+
+        {stage === 'equation' ? renderEquationStage() : renderSolveStage()}
       </div>
 
-      {/* Affirmation */}
-      {showAffirmation && (
-        <div className="text-center mb-5 animate-fade-in">
-          <p className="text-2xl font-semibold text-success">
-            {currentAffirmation}
-          </p>
-        </div>
-      )}
-
-      {/* Feedback for wrong answer - only show correct answer on second wrong attempt */}
-      {isChecked && !isCorrect && !showPencilAnimation && wrongAttempts >= 2 && (
-        <div className="text-center mb-5 animate-fade-in">
-          <p className="text-lg text-muted-foreground">
-            The answer is <span className="font-bold text-success">{question.answer}</span>
-          </p>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex justify-center gap-4">
-        {!isChecked && selectedAnswer !== null && (
-          <Button onClick={checkAnswer} size="lg">
-            Check
-          </Button>
-        )}
-        
-        {isChecked && !isCorrect && !showPencilAnimation && (
-          <Button onClick={retryQuestion} variant="outline" size="lg">
-            Try Again
-          </Button>
-        )}
-        
-        {isChecked && isCorrect && (
-          <Button onClick={nextQuestion} size="lg">
-            {currentQuestion < questions.length - 1 ? (
-              <>
-                Next
-                <ChevronRight className="w-5 h-5 ml-1" />
-              </>
-            ) : (
-              'Done'
-            )}
-          </Button>
-        )}
-      </div>
-
-      {/* Pencil Animation Overlay */}
-      {showPencilAnimation && (
-        <PencilAnimation
+      {/* Interactive guided practice overlay */}
+      {showGuidedPractice && (
+        <GuidedPractice
           lessonType={lessonType}
           num1={question.num1 || question.answer}
           num2={question.num2}
-          onClose={handlePencilAnimationClose}
+          onClose={handleGuidedPracticeClose}
         />
       )}
     </div>

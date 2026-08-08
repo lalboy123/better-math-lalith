@@ -11,7 +11,9 @@ import ConceptVisual from '@/components/ConceptVisual';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
 import LessonCelebration from '@/components/LessonCelebration';
+import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
+import { speak } from '@/lib/speech';
 
 const CountingSun: React.FC = () => {
   const navigate = useNavigate();
@@ -105,30 +107,43 @@ const CountingSun: React.FC = () => {
       case 2:
         return (
           <div className="text-center max-w-3xl mx-auto flex flex-col items-center justify-center flex-1 py-8 animate-fade-in">
-            <h2 className="text-3xl font-semibold text-foreground mb-6">
-              Count from 1 to 9!
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <h2 className="text-3xl font-semibold text-foreground">
+                Count from 1 to 9!
+              </h2>
+              <ReadAloudButton text="1, 2, 3, 4, 5, 6, 7, 8, 9" />
+            </div>
             <p className="text-muted-foreground mb-8 text-lg">
-              Each number tells us how many
+              Each number tells us how many. Tap the speaker to hear them all, or tap a number to hear it.
             </p>
             <div className="grid grid-cols-3 gap-6 max-w-2xl mb-8">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                <div 
-                  key={num} 
-                  className="bg-card rounded-xl p-4 border border-border flex flex-col items-center gap-3 animate-concept"
-                  style={{ animationDelay: `${(num - 1) * 0.15}s` }}
-                >
-                  <span className="text-4xl font-bold text-primary">{num}</span>
-                  <div className="flex flex-wrap justify-center gap-1 max-w-[80px]">
-                    {Array.from({ length: num }).map((_, i) => (
-                      <Apple key={i} size="sm" className="pointer-events-none" />
-                    ))}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+                const word = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][num - 1];
+                return (
+                  <div
+                    key={num}
+                    className="bg-card rounded-xl p-4 border border-border flex flex-col items-center gap-3 animate-concept"
+                    style={{ animationDelay: `${(num - 1) * 0.15}s` }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => speak(word)}
+                      aria-label={`Hear the number ${num}`}
+                      className="text-4xl font-bold text-primary rounded-lg px-3 leading-none transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      {num}
+                    </button>
+                    <div className="flex flex-wrap justify-center gap-1 max-w-[80px]">
+                      {Array.from({ length: num }).map((_, i) => (
+                        <Apple key={i} size="sm" className="pointer-events-none" />
+                      ))}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {word}
+                    </span>
                   </div>
-                  <span className="text-sm text-muted-foreground">
-                    {['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][num - 1]}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         );

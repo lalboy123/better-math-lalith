@@ -8,6 +8,7 @@ import QuizResults from '@/components/QuizResults';
 import HomeButton from '@/components/HomeButton';
 import NavigationArrows from '@/components/NavigationArrows';
 import PlanetTransition from '@/components/PlanetTransition';
+import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 import {
@@ -91,9 +92,12 @@ const CountingVenus: React.FC = () => {
             <h2 className="text-3xl font-semibold text-foreground mb-4">
               Quick Quiz!
             </h2>
-            <p className="text-xl text-muted-foreground mb-10">
-              How many circles?
-            </p>
+            <div className="flex items-center justify-center gap-3 mb-10">
+              <p className="text-xl text-muted-foreground">
+                How many circles?
+              </p>
+              <ReadAloudButton text="How many circles?" />
+            </div>
             
             <div className="flex justify-center gap-4 mb-10 flex-wrap max-w-sm mx-auto">
               {Array.from({ length: mcqQuestion.count }).map((_, i) => (

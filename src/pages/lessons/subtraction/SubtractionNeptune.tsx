@@ -7,6 +7,7 @@ import StoryQuiz from '@/components/StoryQuiz';
 import QuizResults from '@/components/QuizResults';
 import HomeButton from '@/components/HomeButton';
 import NavigationArrows from '@/components/NavigationArrows';
+import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 
 const SubtractionNeptune: React.FC = () => {
@@ -54,9 +55,12 @@ const SubtractionNeptune: React.FC = () => {
             <h2 className="text-3xl font-semibold text-foreground mb-4">
               Quick Quiz!
             </h2>
-            <p className="text-2xl text-foreground mb-10">
-              What is <span className="font-bold text-neptune">{mcqA}</span> − <span className="font-bold text-neptune">{mcqB}</span>?
-            </p>
+            <div className="flex items-center justify-center gap-3 mb-10">
+              <p className="text-2xl text-foreground">
+                What is <span className="font-bold text-neptune">{mcqA}</span> − <span className="font-bold text-neptune">{mcqB}</span>?
+              </p>
+              <ReadAloudButton text={`What is ${mcqA} minus ${mcqB}?`} />
+            </div>
             
             <div className="grid grid-cols-2 gap-6 max-w-sm mx-auto mb-10">
               {mcqOptions.map((option) => (

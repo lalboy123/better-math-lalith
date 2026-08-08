@@ -40,8 +40,10 @@ const QuizResults: React.FC<QuizResultsProps> = ({
       case 'counting':
         return 'Counting objects accurately';
       case 'adding':
+      case 'addition':
         return 'Adding numbers together';
       case 'subtracting':
+      case 'subtraction':
         return 'Subtracting to find the difference';
       default:
         return topic;
@@ -125,7 +127,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
                 Close
               </Button>
               <Button type="button" onClick={onFinish} className="flex-1 min-h-[48px]">
-                Continue
+                {finishLabel}
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </div>

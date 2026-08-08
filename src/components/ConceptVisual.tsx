@@ -1,16 +1,27 @@
 import React from 'react';
 import Apple from './Apple';
 import Pencil from './Pencil';
+import ReadAloudButton from './ReadAloudButton';
 
 interface ConceptVisualProps {
   type: 'counting' | 'addition' | 'subtraction';
   step: number;
 }
 
+const CONCEPT_NARRATION: Record<ConceptVisualProps['type'], string> = {
+  counting:
+    'Counting means finding out how many things there are. We count: one, two, three. The last number we say is how many there are in total!',
+  addition:
+    'Addition means putting things together. If you have 2 pencils and your friend gives you 1 more, you count them all together: 2 plus 1 equals 3. The plus sign means add. The answer is called the sum.',
+  subtraction:
+    'Subtraction means taking things away. If you have 4 pencils and you give 1 to a friend, you count how many are left: 4 minus 1 equals 3. The minus sign means subtract. The answer is called the difference.',
+};
+
 const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'counting') {
     return (
       <div className="flex flex-col items-center gap-8">
+        <ReadAloudButton text={CONCEPT_NARRATION.counting} />
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90 mb-4">
@@ -103,6 +114,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'addition') {
     return (
       <div className="flex flex-col items-center gap-8">
+        <ReadAloudButton text={CONCEPT_NARRATION.addition} />
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90">
@@ -169,6 +181,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'subtraction') {
     return (
       <div className="flex flex-col items-center gap-8">
+        <ReadAloudButton text={CONCEPT_NARRATION.subtraction} />
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90">

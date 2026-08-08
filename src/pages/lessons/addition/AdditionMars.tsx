@@ -9,6 +9,7 @@ import Pencil from '@/components/Pencil';
 import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
+import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
@@ -95,15 +96,23 @@ const AdditionMars: React.FC = () => {
               The Art Shop
             </h2>
             <div className="bg-card rounded-xl p-8 border border-border mb-8 max-w-lg mx-auto">
-              <p className="text-lg text-foreground">
-                Emma has <span className="font-bold text-mars">{wordLeft} pencils</span>.
-              </p>
-              <p className="text-lg text-foreground mt-3">
-                She wants <span className="font-bold text-mars">{wordTarget} pencils</span> total.
-              </p>
-              <p className="text-muted-foreground mt-4 text-base">
-                How many more does she need?
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-left flex-1">
+                  <p className="text-lg text-foreground">
+                    Emma has <span className="font-bold text-mars">{wordLeft} pencils</span>.
+                  </p>
+                  <p className="text-lg text-foreground mt-3">
+                    She wants <span className="font-bold text-mars">{wordTarget} pencils</span> total.
+                  </p>
+                  <p className="text-muted-foreground mt-4 text-base">
+                    How many more does she need?
+                  </p>
+                </div>
+                <ReadAloudButton
+                  text={`Emma has ${wordLeft} pencils. She wants ${wordTarget} pencils total. How many more does she need?`}
+                  className="shrink-0"
+                />
+              </div>
             </div>
             
             <div className="flex justify-center gap-8 mb-8">

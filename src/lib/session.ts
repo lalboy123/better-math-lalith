@@ -1,5 +1,6 @@
 export const ACTIVE_STUDENT_KEY = 'better-math:active';
 export const ACTIVE_TEACHER_KEY = 'better-math:active-teacher';
+export const LAST_CLASS_CODE_KEY = 'better-math:last-class-code';
 export const SESSION_CHANGED = 'better-math:session-changed';
 
 export interface ActiveStudent {
@@ -26,7 +27,20 @@ export const getActiveStudent = (): ActiveStudent | null => {
 
 export const setActiveStudent = (session: ActiveStudent) => {
   localStorage.setItem(ACTIVE_STUDENT_KEY, JSON.stringify(session));
+  try {
+    localStorage.setItem(LAST_CLASS_CODE_KEY, session.classCode);
+  } catch {
+    // ignore storage errors (e.g. private mode)
+  }
   window.dispatchEvent(new Event(SESSION_CHANGED));
+};
+
+export const getLastClassCode = (): string => {
+  try {
+    return localStorage.getItem(LAST_CLASS_CODE_KEY) ?? '';
+  } catch {
+    return '';
+  }
 };
 
 export const clearActiveStudent = () => {

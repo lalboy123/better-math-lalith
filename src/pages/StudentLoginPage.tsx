@@ -9,7 +9,7 @@ import {
   updateStudentState,
 } from '@/lib/classroom';
 import { getClassroomUnlockPlanet } from '@/lib/planets';
-import { setActiveStudent } from '@/lib/session';
+import { getLastClassCode, setActiveStudent } from '@/lib/session';
 import { useGame } from '@/context/GameContext';
 import AuthNavButton from '@/components/AuthNavButton';
 import { STUDENT_HUB_PATH } from '@/lib/studentHub';
@@ -19,7 +19,7 @@ type LoginLocationState = { classCode?: string; nickname?: string };
 const StudentLoginPage: React.FC = () => {
   const location = useLocation();
   const preset = (location.state as LoginLocationState | null) ?? null;
-  const [classCode, setClassCode] = useState(preset?.classCode ?? '');
+  const [classCode, setClassCode] = useState(preset?.classCode ?? getLastClassCode());
   const [nickname, setNickname] = useState(preset?.nickname ?? '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

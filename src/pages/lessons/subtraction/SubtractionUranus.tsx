@@ -9,6 +9,7 @@ import Pencil from '@/components/Pencil';
 import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
+import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
@@ -94,15 +95,23 @@ const SubtractionUranus: React.FC = () => {
               The Classroom
             </h2>
             <div className="bg-card rounded-xl p-8 border border-border mb-8 max-w-lg mx-auto">
-              <p className="text-lg text-foreground">
-                Mr. Chen has <span className="font-bold text-uranus">8 pencils</span>.
-              </p>
-              <p className="text-lg text-foreground mt-3">
-                He wants to keep <span className="font-bold text-uranus">{wordTarget} pencils</span>.
-              </p>
-              <p className="text-muted-foreground mt-4 text-base">
-                How many can he give away?
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="text-left flex-1">
+                  <p className="text-lg text-foreground">
+                    Mr. Chen has <span className="font-bold text-uranus">8 pencils</span>.
+                  </p>
+                  <p className="text-lg text-foreground mt-3">
+                    He wants to keep <span className="font-bold text-uranus">{wordTarget} pencils</span>.
+                  </p>
+                  <p className="text-muted-foreground mt-4 text-base">
+                    How many can he give away?
+                  </p>
+                </div>
+                <ReadAloudButton
+                  text={`Mr. Chen has 8 pencils. He wants to keep ${wordTarget} pencils. How many can he give away?`}
+                  className="shrink-0"
+                />
+              </div>
             </div>
             
             <div className="flex justify-center gap-8 mb-8">
