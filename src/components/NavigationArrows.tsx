@@ -20,13 +20,20 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
   backLabel,
 }) => {
   return (
-    <div className="fixed bottom-8 left-0 right-0 flex justify-between px-8 z-10">
+    <div
+      className="fixed left-0 right-0 flex justify-between px-4 sm:px-8 z-20"
+      style={{
+        bottom: 'max(1.5rem, env(safe-area-inset-bottom))',
+        paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+        paddingRight: 'max(1rem, env(safe-area-inset-right))',
+      }}
+    >
       {showBack && onBack ? (
         <Button
           type="button"
           onClick={onBack}
           variant="outline"
-          className="flex items-center gap-2 border-border bg-card/90 text-foreground hover:bg-muted shadow-sm transition-all duration-200 active:scale-95"
+          className="flex items-center gap-2 border-border bg-card/95 text-foreground hover:bg-muted shadow-sm transition-all duration-200 active:scale-95 min-h-[48px] min-w-[48px]"
         >
           <ChevronLeft className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />
           <span>{backLabel ?? 'Back'}</span>
@@ -34,13 +41,13 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
       ) : (
         <div />
       )}
-      
+
       {showNext && onNext ? (
         <Button
           type="button"
           onClick={onNext}
           variant="outline"
-          className="flex items-center gap-2 border-border bg-card/90 text-foreground hover:bg-muted shadow-sm transition-all duration-200 active:scale-95"
+          className="flex items-center gap-2 border-border bg-card/95 text-foreground hover:bg-muted shadow-sm transition-all duration-200 active:scale-95 min-h-[48px] min-w-[48px]"
         >
           <span>{nextLabel ?? 'Next'}</span>
           <ChevronRight className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />

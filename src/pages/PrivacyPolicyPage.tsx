@@ -18,10 +18,28 @@ const PrivacyPolicyPage: React.FC = () => {
         </div>
       </header>
 
-      <main
-        className="mx-auto max-w-3xl px-6 py-10 privacy-policy-content overflow-x-auto"
-        dangerouslySetInnerHTML={{ __html: policyHtml }}
-      />
+      <main className="mx-auto max-w-3xl px-6 py-10">
+        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h1 className="text-2xl font-semibold text-slate-900 mb-3">Children &amp; classrooms</h1>
+          <p className="text-[15px] leading-relaxed text-slate-600 mb-3">
+            MathLift is designed for classroom learning. Students join with a teacher-provided class
+            code and a nickname (not a full legal name or email). Progress is stored so learners can
+            continue on another device with the same class code and nickname.
+          </p>
+          <p className="text-[15px] leading-relaxed text-slate-600">
+            Teachers should avoid collecting unnecessary personal information. For privacy questions,
+            contact{' '}
+            <a href="mailto:mathlift1234@gmail.com" className="text-blue-700 hover:underline font-medium">
+              mathlift1234@gmail.com
+            </a>
+            .
+          </p>
+        </section>
+        <div
+          className="privacy-policy-content overflow-x-auto"
+          dangerouslySetInnerHTML={{ __html: policyHtml }}
+        />
+      </main>
     </div>
   );
 };

@@ -44,7 +44,8 @@ const HomePage: React.FC = () => {
           Welcome to MathLift
         </h1>
         <p className="text-lg text-muted-foreground max-w-md mx-auto mb-8">
-          Choose your role to get started or resume your progress.
+          Students join with a class code. Teachers manage live progress. Resume anytime on any
+          device.
         </p>
       </div>
 

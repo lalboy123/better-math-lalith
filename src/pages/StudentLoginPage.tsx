@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  checkClassExists,
   findStudentKey,
   getClass,
   normalizeLabel,
+  resolveClassCode,
 } from '@/lib/classroom';
 import { setActiveStudent } from '@/lib/session';
 import { useGame } from '@/context/GameContext';
@@ -33,13 +33,13 @@ const StudentLoginPage: React.FC = () => {
     setError('');
 
     try {
-      const classExists = await checkClassExists(code);
-      if (!classExists) {
+      const resolved = await resolveClassCode(code);
+      if (!resolved) {
         setError(`Class code "${code}" does not exist.`);
         return;
       }
 
-      const cls = await getClass(code);
+      const cls = await getClass(resolved);
       const key = findStudentKey(cls?.students, name);
       const student = key ? cls?.students?.[key] : null;
 
@@ -53,7 +53,7 @@ const StudentLoginPage: React.FC = () => {
       hydrateClassMax(cls?.defaultStart?.planet);
       hydrateFromStudent(student);
       setActiveStudent({
-        classCode: code,
+        classCode: resolved,
         nickname: key,
         displayName: student.nickname || name,
       });
@@ -69,7 +69,7 @@ const StudentLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-8">
+    <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-6 sm:p-8">
       <div className="w-full max-w-md bg-card/95 p-6 rounded-2xl shadow-lg border border-border animate-fade-in backdrop-blur-sm">
         <h2 className="text-2xl font-semibold mb-2">Student Login</h2>
         <p className="text-muted-foreground mb-6">
@@ -85,11 +85,12 @@ const StudentLoginPage: React.FC = () => {
               setClassCode(e.target.value);
               setError('');
             }}
-            className="w-full mb-4 text-foreground bg-background px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+            className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
             placeholder="Class Code"
             required
             disabled={loading}
             autoComplete="off"
+            autoCapitalize="none"
           />
 
           <label className="block mb-2 font-medium">Your Nickname</label>
@@ -99,7 +100,7 @@ const StudentLoginPage: React.FC = () => {
               setNickname(e.target.value);
               setError('');
             }}
-            className="w-full mb-4 text-foreground bg-background px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+            className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
             placeholder="The name you registered with"
             required
             disabled={loading}
@@ -117,7 +118,7 @@ const StudentLoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
+              className="bg-emerald-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-emerald-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none min-h-[48px]"
             >
               {loading ? 'Loading…' : 'Resume Game'}
             </button>

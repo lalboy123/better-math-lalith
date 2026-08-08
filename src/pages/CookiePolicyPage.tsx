@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const COMPANY_NAME = 'MathLift';
 const WEBSITE_URL = 'https://better-math-lalith.vercel.app';
-const LAST_UPDATED = 'May 22, 2026';
+const LAST_UPDATED = 'August 8, 2026';
 
 type CookieEntry = {
   name: string;
@@ -20,8 +20,8 @@ const analyticsCookies: CookieEntry[] = [
     name: '_ga',
     purpose:
       'Records a particular ID used to come up with data about website usage by the user',
-    provider: '.better-math-lalith.vercel.app',
-    service: 'Google Analytics',
+    provider: 'MathLift / Google Analytics',
+    service: 'Google Analytics (when supported by the browser)',
     servicePrivacyUrl: 'https://business.safety.google/privacy/',
     type: 'http_cookie',
     expiresIn: '1 year 1 month 4 days',
@@ -30,8 +30,8 @@ const analyticsCookies: CookieEntry[] = [
     name: '_ga_#',
     purpose:
       'Used to distinguish individual users by means of designation of a randomly generated number as client identifier, which allows calculation of visits and sessions',
-    provider: '.better-math-lalith.vercel.app',
-    service: 'Google Analytics',
+    provider: 'MathLift / Google Analytics',
+    service: 'Google Analytics (when supported by the browser)',
     servicePrivacyUrl: 'https://business.safety.google/privacy/',
     type: 'http_cookie',
     expiresIn: '1 year 1 month 4 days',
@@ -195,22 +195,19 @@ const CookiePolicyPage: React.FC = () => {
 
         <Section title="How can I control cookies?">
           <p>
-            You have the right to decide whether to accept or reject cookies. You can exercise your
-            cookie rights by setting your preferences in the Cookie Preference Center. The Cookie
-            Preference Center allows you to select which categories of cookies you accept or
-            reject. Essential cookies cannot be rejected as they are strictly necessary to provide
-            you with services.
+            MathLift does not currently show an in-app cookie preference banner. You can control
+            cookies through your browser or device settings (block or clear cookies, or use private
+            browsing). Analytics cookies load only when the environment supports them and are used
+            to understand aggregate usage of MathLift.
           </p>
           <p>
-            The Cookie Preference Center can be found in the notification banner and on our Website.
-            If you choose to reject cookies, you may still use our Website though your access to
-            some functionality and areas of our Website may be restricted. You may also set or
-            amend your web browser controls to accept or refuse cookies.
+            Classroom progress is stored in Firebase using your class code and student nickname —
+            that is app functionality, not advertising cookies. If you prefer not to use analytics
+            cookies, configure your browser to block third-party or analytics cookies; MathLift
+            lessons will still work.
           </p>
           <p>
-            The specific types of first- and third-party cookies served through our Website and the
-            purposes they perform are described in the table below (please note that the specific
-            cookies served may vary depending on the specific Online Properties you visit):
+            The specific analytics cookies that may be served, when supported, are described below:
           </p>
 
           <h3 className="text-lg font-semibold text-slate-900 pt-2">

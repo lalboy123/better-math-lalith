@@ -9,6 +9,7 @@ import Basket from '@/components/Basket';
 import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
+import LessonCelebration from '@/components/LessonCelebration';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
@@ -143,18 +144,8 @@ const CountingMercury: React.FC = () => {
               You practiced counting! Watch this fun video:
             </p>
             
-            <div className="bg-card rounded-xl p-10 border border-border max-w-xl mx-auto mb-10">
-              <div className="aspect-video bg-muted rounded-lg">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/G8hLQFpq0rU?si=BcyEG-LomVzdDWL_"
-                  title="Counting Fun"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-lg"
-                />
-              </div>
+            <div className="mb-10 w-full px-2">
+              <LessonCelebration lessonType="counting" />
             </div>
             
             <Button onClick={() => setShowTransition(true)} size="lg">

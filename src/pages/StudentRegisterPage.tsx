@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  checkClassExists,
   checkStudentExists,
   registerStudent,
   getClass,
   normalizeLabel,
   nicknameKey,
+  resolveClassCode,
 } from '@/lib/classroom';
 import { setActiveStudent } from '@/lib/session';
 import { useGame } from '@/context/GameContext';
@@ -33,13 +33,13 @@ const StudentRegisterPage: React.FC = () => {
     setNameTaken(false);
 
     try {
-      const classExists = await checkClassExists(code);
-      if (!classExists) {
+      const resolved = await resolveClassCode(code);
+      if (!resolved) {
         setError(`Class code "${code}" does not exist. Please ask your teacher for the correct code.`);
         return;
       }
 
-      const studentExists = await checkStudentExists(code, name);
+      const studentExists = await checkStudentExists(resolved, name);
       if (studentExists) {
         setNameTaken(true);
         setError(
@@ -48,37 +48,37 @@ const StudentRegisterPage: React.FC = () => {
         return;
       }
 
-      const student = await registerStudent(code, name);
-      if (!student) {
-        setError('Failed to register. Please try again.');
+      const result = await registerStudent(resolved, name);
+      if (!result) {
+        setError('Failed to join. Please try again.');
         return;
       }
 
-      const cls = await getClass(code);
+      const cls = await getClass(result.classCode);
       hydrateClassMax(cls?.defaultStart?.planet);
-      hydrateFromStudent(student);
+      hydrateFromStudent(result.student);
       setActiveStudent({
-        classCode: code,
+        classCode: result.classCode,
         nickname: nicknameKey(name),
-        displayName: student.nickname,
+        displayName: result.student.nickname,
       });
       navigate(STUDENT_HUB_PATH, { replace: true });
     } catch (err: unknown) {
       console.error(err);
       const message = err instanceof Error ? err.message : 'Check your connection.';
-      setError('Failed to register: ' + message);
+      setError('Failed to join: ' + message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-8">
+    <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-6 sm:p-8">
       <div className="w-full max-w-md bg-card/95 p-6 rounded-2xl shadow-lg border border-border animate-fade-in backdrop-blur-sm">
         <h2 className="text-2xl font-semibold mb-2">Join a Class</h2>
         <p className="text-muted-foreground mb-6">
           Enter your teacher&apos;s class code and pick a nickname. Use the same nickname later to
-          resume on any device.
+          resume on any phone, tablet, or computer.
         </p>
 
         <form onSubmit={handleRegister}>
@@ -90,11 +90,12 @@ const StudentRegisterPage: React.FC = () => {
               setError('');
               setNameTaken(false);
             }}
-            className="w-full mb-4 text-foreground bg-background px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+            className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
             placeholder="Ask your teacher for this"
             required
             disabled={loading}
             autoComplete="off"
+            autoCapitalize="none"
           />
 
           <label className="block mb-2 font-medium">Your Nickname</label>
@@ -105,7 +106,7 @@ const StudentRegisterPage: React.FC = () => {
               setError('');
               setNameTaken(false);
             }}
-            className="w-full mb-4 text-foreground bg-background px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
+            className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
             placeholder="Type your name"
             required
             disabled={loading}
@@ -120,10 +121,13 @@ const StudentRegisterPage: React.FC = () => {
                   type="button"
                   onClick={() =>
                     navigate('/student-login', {
-                      state: { classCode: normalizeLabel(classCode), nickname: normalizeLabel(nickname) },
+                      state: {
+                        classCode: normalizeLabel(classCode),
+                        nickname: normalizeLabel(nickname),
+                      },
                     })
                   }
-                  className="mt-2 block w-full text-center font-semibold underline underline-offset-2 hover:opacity-90"
+                  className="mt-2 block w-full text-center font-semibold underline underline-offset-2 hover:opacity-90 min-h-[44px]"
                 >
                   Go to Login
                 </button>
@@ -136,7 +140,7 @@ const StudentRegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
+              className="bg-emerald-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-emerald-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none min-h-[48px]"
             >
               {loading ? 'Joining…' : 'Join Class'}
             </button>

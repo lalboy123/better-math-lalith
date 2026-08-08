@@ -18,61 +18,61 @@ interface StoryQuizProps {
 
 const countingQuestions: Question[] = [
   {
-    story: "Luna is going to space! She packs her bag.",
-    question: "Count the stars: ⭐⭐⭐⭐⭐ How many?",
+    story: 'Luna is going to space! She packs her bag.',
+    question: 'How many stars does Luna pack?',
     options: [4, 5, 6, 3],
     answer: 5,
-    num1: 5
+    num1: 5,
   },
   {
-    story: "Luna looks at her food.",
-    question: "Count: 🍎🍎🍎🍎🍎🍎🍎 How many apples?",
+    story: 'Luna looks at her food.',
+    question: 'How many apples are ready for the trip?',
     options: [6, 7, 8, 5],
     answer: 7,
-    num1: 7
+    num1: 7,
   },
   {
-    story: "She gets her suits.",
-    question: "Count: 🧥🧥🧥 How many suits?",
+    story: 'She gets her suits.',
+    question: 'How many space suits does Luna have?',
     options: [2, 3, 4, 1],
     answer: 3,
-    num1: 3
+    num1: 3,
   },
   {
-    story: "Luna sees buttons.",
-    question: "Count: 🔴🔴🔴🔴🔴🔴 How many red dots?",
+    story: 'Luna sees buttons on the control panel.',
+    question: 'How many red buttons does she see?',
     options: [5, 6, 7, 4],
     answer: 6,
-    num1: 6
+    num1: 6,
   },
   {
-    story: "She checks the power.",
-    question: "Count: ⚡⚡⚡⚡ How many?",
+    story: 'She checks the power meters.',
+    question: 'How many power meters are lit?',
     options: [3, 4, 5, 2],
     answer: 4,
-    num1: 4
+    num1: 4,
   },
   {
-    story: "Luna counts windows.",
-    question: "Count: 🪟🪟🪟🪟🪟🪟🪟🪟 How many?",
+    story: 'Luna counts windows on the ship.',
+    question: 'How many windows does Luna count?',
     options: [7, 8, 9, 6],
     answer: 8,
-    num1: 8
+    num1: 8,
   },
   {
-    story: "Time to go! She sees stars.",
-    question: "Count: ✨✨✨✨✨✨ How many stars?",
+    story: 'Time to go! She sees stars outside.',
+    question: 'How many bright stars does she see?',
     options: [5, 6, 7, 4],
     answer: 6,
-    num1: 6
+    num1: 6,
   },
   {
-    story: "Luna made it! She is happy.",
-    question: "Count her toys: 🚀🚀 How many rockets?",
+    story: 'Luna made it! She is happy.',
+    question: 'How many toy rockets does Luna have?',
     options: [1, 2, 3, 4],
     answer: 2,
-    num1: 2
-  }
+    num1: 2,
+  },
 ];
 
 const additionQuestions: Question[] = [
@@ -418,7 +418,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
   if (showRocketLaunch) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center animate-fade-in subtle-stars">
-        <p className="text-3xl font-bold text-foreground mb-8 animate-fade-in">All stars earned! 🌟</p>
+        <p className="text-3xl font-bold text-foreground mb-8 animate-fade-in">All stars earned!</p>
         <div className="relative w-40 h-40 animate-rocket-launch-screen">
           <Rocket className="w-40 h-40 text-primary rotate-[-90deg]" />
           {/* Flame effect */}
@@ -476,15 +476,20 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
           {currentQuestion + 1} of {questions.length}
         </span>
         
-        <p className="text-xl text-foreground mb-6">
-          {question.question.split(/([\p{Emoji_Presentation}\p{Extended_Pictographic}]+)/gu).map((part, i) =>
-            /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(part) ? (
-              <span key={i} className="text-4xl leading-relaxed">{part}</span>
-            ) : (
-              <span key={i}>{part}</span>
-            )
-          )}
-        </p>
+        <p className="text-xl text-foreground mb-4">{question.question}</p>
+
+        {lessonType === 'counting' && question.num1 ? (
+          <div className="flex flex-wrap justify-center gap-2 mb-6 max-w-xs mx-auto">
+            {Array.from({ length: question.num1 }).map((_, i) => (
+              <span
+                key={i}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/25 text-primary"
+              >
+                <Star className="h-4 w-4 fill-current" />
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         {/* Options */}
         <div className="grid grid-cols-2 gap-3">

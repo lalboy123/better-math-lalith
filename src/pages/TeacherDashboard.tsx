@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { Classroom, setClassDefaultStart, subscribeToClass } from '@/lib/classroom';
-import { clearActiveTeacher, setActiveTeacher } from '@/lib/session';
+import { clearActiveTeacher, getActiveTeacher, setActiveTeacher } from '@/lib/session';
 import { getLessonForPlanet, PLANET_META, type PlanetId } from '@/lib/planets';
 import { Button } from '@/components/ui/button';
 
@@ -12,29 +12,54 @@ const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [cls, setCls] = useState<Classroom | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [defaultPlanet, setDefaultPlanet] = useState('sun');
   const [savingDefault, setSavingDefault] = useState(false);
   const [defaultSaved, setDefaultSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!classCode) return;
 
-    setActiveTeacher({ classCode });
-
-    const unsubscribe = subscribeToClass(classCode, (data) => {
-      setCls(data);
-      setLoading(false);
-      if (data?.defaultStart?.planet) {
-        setDefaultPlanet(data.defaultStart.planet);
-      }
+    const existing = getActiveTeacher();
+    setActiveTeacher({
+      classCode,
+      teacherCode: existing?.classCode === classCode ? existing.teacherCode : existing?.teacherCode,
     });
+
+    const unsubscribe = subscribeToClass(
+      classCode,
+      (data) => {
+        setCls(data);
+        setLoading(false);
+        if (!data) {
+          setLoadError('This class was not found. Check the class code or create a new class.');
+          return;
+        }
+        setLoadError('');
+        if (data.defaultStart?.planet) {
+          setDefaultPlanet(data.defaultStart.planet);
+        }
+      },
+      () => {
+        setLoading(false);
+        setLoadError('Could not connect to the class. Check your internet connection.');
+      }
+    );
 
     return () => unsubscribe();
   }, [classCode]);
 
-  if (!classCode) return <div className="p-8 text-center text-xl">No class code provided</div>;
+  if (!classCode) {
+    return (
+      <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-8">
+        <p className="text-xl text-foreground">No class code provided</p>
+      </div>
+    );
+  }
 
   const derivedLesson = getLessonForPlanet(defaultPlanet);
+  const teacherPin = cls?.teacherCode || getActiveTeacher()?.teacherCode;
 
   const handleSignOut = () => {
     clearActiveTeacher();
@@ -44,10 +69,14 @@ const TeacherDashboard: React.FC = () => {
   const handleDefaultChange = async (planet: string) => {
     setDefaultPlanet(planet);
     setDefaultSaved(false);
+    setSaveError('');
     setSavingDefault(true);
     try {
       await setClassDefaultStart(classCode, planet);
       setDefaultSaved(true);
+    } catch (err) {
+      console.error(err);
+      setSaveError('Could not save unlock setting. Try again.');
     } finally {
       setSavingDefault(false);
     }
@@ -56,7 +85,7 @@ const TeacherDashboard: React.FC = () => {
   const students = cls?.students ? Object.entries(cls.students) : [];
 
   return (
-    <div className="min-h-screen bg-background subtle-stars p-8">
+    <div className="min-h-screen bg-background subtle-stars p-4 sm:p-8 pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div className="max-w-5xl mx-auto animate-fade-in">
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
           <div>
@@ -66,17 +95,29 @@ const TeacherDashboard: React.FC = () => {
               <span className="font-semibold text-foreground">{classCode}</span>
               {' — '}share this with students to join.
             </p>
+            {teacherPin && (
+              <p className="text-sm text-sky-300 mt-1">
+                Teacher PIN: <span className="font-semibold tracking-widest">{teacherPin}</span>
+                {' '}(keep private)
+              </p>
+            )}
           </div>
           <Button
             type="button"
             variant="outline"
             onClick={handleSignOut}
-            className="inline-flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted shadow-sm"
+            className="inline-flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted shadow-sm min-h-[48px]"
           >
             <LogOut className="h-5 w-5 shrink-0 text-foreground" strokeWidth={2.25} aria-hidden />
             <span>Sign Out</span>
           </Button>
         </div>
+
+        {loadError && (
+          <div className="mb-6 p-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive">
+            {loadError}
+          </div>
+        )}
 
         <section className="mb-8 bg-card/95 p-6 rounded-2xl shadow border border-border backdrop-blur-sm">
           <h2 className="text-xl font-semibold mb-2">Unlocked Planets</h2>
@@ -88,8 +129,8 @@ const TeacherDashboard: React.FC = () => {
             <select
               value={defaultPlanet}
               onChange={(e) => handleDefaultChange(e.target.value)}
-              disabled={savingDefault}
-              className="border border-border rounded-xl px-3 py-2 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              disabled={savingDefault || !!loadError}
+              className="border border-border rounded-xl px-3 py-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring min-h-[48px]"
             >
               <option value="sun">Sun</option>
               <option value="mercury">Mercury</option>
@@ -104,12 +145,11 @@ const TeacherDashboard: React.FC = () => {
             <span className="text-sm font-medium text-sky-300 capitalize px-2">
               Lesson: {derivedLesson}
             </span>
-            {savingDefault && (
-              <span className="text-sm text-muted-foreground">Saving…</span>
-            )}
+            {savingDefault && <span className="text-sm text-muted-foreground">Saving…</span>}
             {defaultSaved && !savingDefault && (
               <span className="text-sm text-emerald-400 font-medium">Saved</span>
             )}
+            {saveError && <span className="text-sm text-destructive">{saveError}</span>}
           </div>
         </section>
 
@@ -127,8 +167,7 @@ const TeacherDashboard: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {students.map(([key, s]) => {
-                const planetName =
-                  PLANET_META[s.planet as PlanetId]?.name ?? s.planet;
+                const planetName = PLANET_META[s.planet as PlanetId]?.name ?? s.planet;
                 return (
                   <div
                     key={key}

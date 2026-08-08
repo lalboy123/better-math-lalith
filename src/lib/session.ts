@@ -12,6 +12,7 @@ export interface ActiveStudent {
 
 export interface ActiveTeacher {
   classCode: string;
+  teacherCode?: string;
 }
 
 export const getActiveStudent = (): ActiveStudent | null => {

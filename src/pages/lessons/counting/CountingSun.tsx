@@ -10,6 +10,7 @@ import Counter from '@/components/Counter';
 import ConceptVisual from '@/components/ConceptVisual';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
+import LessonCelebration from '@/components/LessonCelebration';
 import { Button } from '@/components/ui/button';
 
 const CountingSun: React.FC = () => {
@@ -70,7 +71,7 @@ const CountingSun: React.FC = () => {
               Put Apples in the Basket
             </h2>
             <p className="text-muted-foreground mb-8 text-lg">
-              Click an apple to add it
+              Tap an apple to add it
             </p>
             
             <div className="flex flex-col items-center gap-8">
@@ -139,21 +140,11 @@ const CountingSun: React.FC = () => {
               Great Work on the Sun!
             </h2>
             <p className="text-xl text-muted-foreground mb-10">
-              You learned how to count. Watch this video:
+              You learned how to count. Celebrate what you learned:
             </p>
             
-            <div className="bg-card rounded-xl p-10 border border-border max-w-xl mx-auto mb-10">
-              <div className="aspect-video bg-muted rounded-lg">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/G8hLQFpq0rU?si=BcyEG-LomVzdDWL_"
-                  title="Counting Song"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-lg"
-                />
-              </div>
+            <div className="mb-10 w-full px-2">
+              <LessonCelebration lessonType="counting" />
             </div>
             
             <Button onClick={() => setShowTransition(true)} size="lg">

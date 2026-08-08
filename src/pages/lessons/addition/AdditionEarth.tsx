@@ -8,6 +8,7 @@ import Pencil from '@/components/Pencil';
 import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
+import LessonCelebration from '@/components/LessonCelebration';
 import { Button } from '@/components/ui/button';
 import { Check, X, Play, RotateCcw } from 'lucide-react';
 
@@ -110,7 +111,7 @@ const AdditionEarth: React.FC = () => {
               Watch: Adding Pencils
             </h2>
             
-            <div className="bg-card rounded-xl p-10 border border-border mb-8 min-w-[400px]">
+            <div className="bg-card rounded-xl p-10 border border-border mb-8 w-full max-w-md">
               <div className="flex justify-center items-end gap-3 mb-6 min-h-[120px]">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i}>
@@ -161,7 +162,7 @@ const AdditionEarth: React.FC = () => {
               Add Pencils
             </h2>
             <p className="text-lg text-muted-foreground mb-10">
-              Click pencils to add them
+              Tap pencils to add them
             </p>
             
             <div className="bg-card rounded-xl p-10 border border-border mb-8">
@@ -278,21 +279,11 @@ const AdditionEarth: React.FC = () => {
               Great Work on Earth!
             </h2>
             <p className="text-xl text-muted-foreground mb-10">
-              You learned how to add. Watch this video:
+              You learned how to add. Celebrate what you learned:
             </p>
             
-            <div className="bg-card rounded-xl p-10 border border-border max-w-xl mx-auto mb-10">
-              <div className="aspect-video bg-muted rounded-lg">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src="https://www.youtube.com/embed/G8hLQFpq0rU?si=BcyEG-LomVzdDWL_"
-                  title="Addition Song"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="rounded-lg"
-                />
-              </div>
+            <div className="mb-10 w-full px-2">
+              <LessonCelebration lessonType="addition" />
             </div>
             
             <Button onClick={() => setShowTransition(true)} size="lg">

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Rocket } from 'lucide-react';
 import { useGame } from '@/context/GameContext';
@@ -16,6 +16,8 @@ import {
   getTopicDisplayName,
 } from '@/lib/planets';
 
+const BASE_SIZE = 640; // design space that fits Neptune orbit (580) + labels
+
 const SolarSystemPage: React.FC = () => {
   const navigate = useNavigate();
   const {
@@ -31,6 +33,8 @@ const SolarSystemPage: React.FC = () => {
   const [classroom, setClassroom] = useState<Classroom | null>(null);
   const [displayName, setDisplayName] = useState('');
   const [selecting, setSelecting] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const active = getActiveStudent();
@@ -50,6 +54,19 @@ const SolarSystemPage: React.FC = () => {
     });
     return () => unsub();
   }, [navigate, hydrateFromStudent, hydrateClassMax]);
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const update = () => {
+      const width = el.clientWidth;
+      setScale(Math.min(1, width / BASE_SIZE));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const handleSignOut = () => {
     clearActiveStudent();
@@ -96,132 +113,141 @@ const SolarSystemPage: React.FC = () => {
   const orbitPlanets = PLANET_ORDER.filter((id) => id !== 'sun');
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex flex-col items-center justify-center p-8 overflow-hidden">
-      <div className="animate-fade-in z-20 text-center mb-8">
+    <div className="min-h-screen bg-background subtle-stars flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden pb-28">
+      <div className="animate-fade-in z-20 text-center mb-6 sm:mb-8">
         {displayName && (
           <p className="text-sm text-muted-foreground mb-2">
             Playing as <strong className="text-foreground">{displayName}</strong>
           </p>
         )}
-        <h1 className="text-3xl font-semibold text-foreground mb-2">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
           Choose Your Destination
         </h1>
-        <p className="text-muted-foreground max-w-lg mx-auto">
+        <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
           Your teacher has unlocked planets through{' '}
           <strong className="text-foreground">{maxPlanetName}</strong>. Tap a planet to start or
           continue its lesson.
         </p>
       </div>
 
-      <div className="relative w-full max-w-2xl aspect-square flex items-center justify-center mb-8">
-        {orbitPlanets.map((id) => (
-          <div
-            key={`orbit-${id}`}
-            className="absolute rounded-full border border-muted-foreground/20"
-            style={{
-              width: `${SOLAR_ORBIT[id].orbitRadius * 2}px`,
-              height: `${SOLAR_ORBIT[id].orbitRadius * 2}px`,
-            }}
-          />
-        ))}
-
-        {maxOrbitRadius > 0 && (
-          <div
-            className="absolute transition-all duration-500 pointer-events-none"
-            style={{
-              width: `${maxOrbitRadius * 2}px`,
-              height: `${maxOrbitRadius * 2}px`,
-              opacity: 0.5,
-            }}
-          >
-            <Rocket
-              className="absolute text-cyan-400 animate-pulse"
-              size={24}
-              style={{ top: '-12px', right: '-12px' }}
-            />
-          </div>
-        )}
-
-        {PLANET_ORDER.map((planetId, index) => {
-          const meta = PLANET_META[planetId];
-          const selectable = canSelectPlanet(planetId, {
-            classMaxPlanetId: classMax,
-            progressPlanetId,
-          });
-          const isCompleted = completedPlanets[planetId];
-          const topic = getTopicDisplayName(planetId);
-
-          if (planetId === 'sun') {
-            return (
-              <button
-                key={planetId}
-                type="button"
-                disabled={!selectable}
-                onClick={() => handlePlanetClick(planetId)}
-                className={`absolute z-10 flex flex-col items-center transition-transform ${
-                  selectable ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-40'
-                }`}
-              >
-                <div
-                  className="w-12 h-12 rounded-full shadow-lg"
-                  style={{
-                    backgroundColor: meta.color,
-                    boxShadow: selectable ? `0 0 20px ${meta.color}80` : 'none',
-                  }}
-                />
-                <span className="mt-2 text-sm font-semibold text-foreground whitespace-nowrap">
-                  {meta.name}
-                </span>
-                <span className="text-xs text-muted-foreground">{topic}</span>
-              </button>
-            );
-          }
-
-          const anglePerPlanet = 360 / orbitPlanets.length;
-          const angle = (anglePerPlanet * (index - 1)) * (Math.PI / 180);
-          const r = SOLAR_ORBIT[planetId].orbitRadius;
-          const x = Math.cos(angle) * r;
-          const y = Math.sin(angle) * r;
-
-          return (
-            <button
-              key={planetId}
-              type="button"
-              disabled={!selectable}
-              onClick={() => handlePlanetClick(planetId)}
-              className={`absolute z-10 flex flex-col items-center transition-all ${
-                selectable ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-40'
-              }`}
-              style={{ transform: `translate(${x}px, ${y}px)` }}
-            >
+      <div ref={stageRef} className="relative w-full max-w-3xl aspect-square flex items-center justify-center mb-8">
+        <div
+          className="relative"
+          style={{
+            width: BASE_SIZE,
+            height: BASE_SIZE,
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+          }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            {orbitPlanets.map((id) => (
               <div
-                className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center ${
-                  isCompleted ? 'ring-2 ring-green-400' : ''
-                }`}
+                key={`orbit-${id}`}
+                className="absolute rounded-full border border-muted-foreground/20"
                 style={{
-                  backgroundColor: selectable ? meta.color : '#666',
-                  boxShadow: selectable ? `0 0 15px ${meta.color}80` : 'none',
+                  width: `${SOLAR_ORBIT[id].orbitRadius * 2}px`,
+                  height: `${SOLAR_ORBIT[id].orbitRadius * 2}px`,
+                }}
+              />
+            ))}
+
+            {maxOrbitRadius > 0 && (
+              <div
+                className="absolute transition-all duration-500 pointer-events-none"
+                style={{
+                  width: `${maxOrbitRadius * 2}px`,
+                  height: `${maxOrbitRadius * 2}px`,
+                  opacity: 0.5,
                 }}
               >
-                {!selectable && <Lock size={14} className="text-muted-foreground" />}
-                {isCompleted && selectable && (
-                  <span className="text-white text-xs font-bold">✓</span>
-                )}
+                <Rocket
+                  className="absolute text-cyan-400 animate-pulse"
+                  size={24}
+                  style={{ top: '-12px', right: '-12px' }}
+                />
               </div>
-              <span className="mt-2 text-xs font-semibold text-foreground whitespace-nowrap">
-                {meta.name}
-              </span>
-              <span className="text-[10px] text-muted-foreground whitespace-nowrap">{topic}</span>
-            </button>
-          );
-        })}
+            )}
+
+            {PLANET_ORDER.map((planetId, index) => {
+              const meta = PLANET_META[planetId];
+              const selectable = canSelectPlanet(planetId, {
+                classMaxPlanetId: classMax,
+                progressPlanetId,
+              });
+              const isCompleted = completedPlanets[planetId];
+              const topic = getTopicDisplayName(planetId);
+
+              if (planetId === 'sun') {
+                return (
+                  <button
+                    key={planetId}
+                    type="button"
+                    disabled={!selectable || selecting}
+                    onClick={() => handlePlanetClick(planetId)}
+                    className={`absolute z-10 flex flex-col items-center transition-transform duration-200 ${
+                      selectable ? 'cursor-pointer hover:scale-110 active:scale-95' : 'cursor-not-allowed opacity-40'
+                    }`}
+                    style={{ minWidth: 56, minHeight: 56 }}
+                  >
+                    <div
+                      className="w-14 h-14 rounded-full shadow-lg"
+                      style={{
+                        backgroundColor: meta.color,
+                        boxShadow: selectable ? `0 0 20px ${meta.color}80` : 'none',
+                      }}
+                    />
+                    <span className="mt-2 text-sm font-semibold text-foreground whitespace-nowrap">
+                      {meta.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{topic}</span>
+                  </button>
+                );
+              }
+
+              const anglePerPlanet = 360 / orbitPlanets.length;
+              const angle = anglePerPlanet * (index - 1) * (Math.PI / 180);
+              const r = SOLAR_ORBIT[planetId].orbitRadius;
+              const x = Math.cos(angle) * r;
+              const y = Math.sin(angle) * r;
+
+              return (
+                <button
+                  key={planetId}
+                  type="button"
+                  disabled={!selectable || selecting}
+                  onClick={() => handlePlanetClick(planetId)}
+                  className={`absolute z-10 flex flex-col items-center transition-all duration-200 ${
+                    selectable ? 'cursor-pointer hover:scale-110 active:scale-95' : 'cursor-not-allowed opacity-40'
+                  }`}
+                  style={{ transform: `translate(${x}px, ${y}px)`, minWidth: 48, minHeight: 48 }}
+                >
+                  <div
+                    className={`w-12 h-12 rounded-full shadow-lg flex items-center justify-center ${
+                      isCompleted ? 'ring-2 ring-green-400' : ''
+                    }`}
+                    style={{
+                      backgroundColor: selectable ? meta.color : '#666',
+                      boxShadow: selectable ? `0 0 15px ${meta.color}80` : 'none',
+                    }}
+                  >
+                    {!selectable && <Lock size={16} className="text-muted-foreground" />}
+                    {isCompleted && selectable && (
+                      <span className="text-white text-sm font-bold">✓</span>
+                    )}
+                  </div>
+                  <span className="mt-2 text-xs font-semibold text-foreground whitespace-nowrap">
+                    {meta.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap">{topic}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      <NavigationArrows
-        onBack={handleSignOut}
-        showNext={false}
-        backLabel="Sign Out"
-      />
+      <NavigationArrows onBack={handleSignOut} showNext={false} backLabel="Sign Out" />
     </div>
   );
 };

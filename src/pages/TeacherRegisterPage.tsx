@@ -8,6 +8,8 @@ const TeacherRegisterPage: React.FC = () => {
   const [classCode, setClassCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [createdPin, setCreatedPin] = useState<string | null>(null);
+  const [createdCode, setCreatedCode] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -25,9 +27,10 @@ const TeacherRegisterPage: React.FC = () => {
         return;
       }
 
-      await createClass(code);
-      setActiveTeacher({ classCode: code });
-      navigate(`/teacher/${code}`, { replace: true });
+      const created = await createClass(code);
+      setActiveTeacher({ classCode: created.classCode, teacherCode: created.teacherCode });
+      setCreatedCode(created.classCode);
+      setCreatedPin(created.teacherCode);
     } catch (err: unknown) {
       console.error(err);
       const message = err instanceof Error ? err.message : 'Check your connection.';
@@ -37,12 +40,43 @@ const TeacherRegisterPage: React.FC = () => {
     }
   };
 
+  if (createdCode && createdPin) {
+    return (
+      <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-6 sm:p-8">
+        <div className="w-full max-w-md bg-card/95 p-6 rounded-2xl shadow-lg border border-border animate-fade-in backdrop-blur-sm">
+          <h2 className="text-2xl font-semibold mb-2">Class Created</h2>
+          <p className="text-muted-foreground mb-6">
+            Save these codes. Students need the class code. You need the teacher PIN to manage the
+            class later.
+          </p>
+          <div className="space-y-4 mb-6">
+            <div className="rounded-xl border border-border bg-background/60 p-4">
+              <p className="text-sm text-muted-foreground mb-1">Student class code</p>
+              <p className="text-2xl font-bold tracking-wide text-foreground">{createdCode}</p>
+            </div>
+            <div className="rounded-xl border border-sky-500/40 bg-sky-500/10 p-4">
+              <p className="text-sm text-sky-200/80 mb-1">Teacher PIN (keep private)</p>
+              <p className="text-2xl font-bold tracking-widest text-foreground">{createdPin}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(`/teacher/${createdCode}`, { replace: true })}
+            className="w-full bg-sky-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-sky-500 active:scale-[0.98] transition-all duration-200 min-h-[48px]"
+          >
+            Open Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-8">
+    <div className="min-h-screen bg-background subtle-stars flex items-center justify-center p-6 sm:p-8">
       <div className="w-full max-w-md bg-card/95 p-6 rounded-2xl shadow-lg border border-border animate-fade-in backdrop-blur-sm">
         <h2 className="text-2xl font-semibold mb-2">Create a Class</h2>
         <p className="text-muted-foreground mb-6">
-          Pick a unique class code students will use to join (works on phones, tablets, and computers).
+          Pick a unique class code students will use to join on phones, tablets, and computers.
         </p>
 
         <form onSubmit={handleRegister}>
@@ -53,11 +87,12 @@ const TeacherRegisterPage: React.FC = () => {
               setClassCode(e.target.value);
               setError('');
             }}
-            className="w-full mb-4 text-foreground bg-background px-4 py-2.5 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow"
-            placeholder="e.g., MATH101"
+            className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
+            placeholder="e.g., math101"
             required
             disabled={loading}
             autoComplete="off"
+            autoCapitalize="none"
           />
 
           {error && (
@@ -71,7 +106,7 @@ const TeacherRegisterPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="bg-sky-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-sky-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
+              className="bg-sky-600 text-white px-5 py-3 rounded-xl font-semibold hover:bg-sky-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none min-h-[48px]"
             >
               {loading ? 'Creating…' : 'Create Class'}
             </button>

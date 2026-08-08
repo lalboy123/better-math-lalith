@@ -63,10 +63,12 @@ const CircleDiagram: React.FC<Props> = ({ planets, size = 360, onSelect, selecte
               opacity={isDisabled ? 0.35 : 1}
               className={!isDisabled ? 'origin-center hover:opacity-100' : undefined}
             >
+              {/* Invisible larger hit target for touch (~44pt) */}
+              <circle cx={px} cy={py} r={28} fill="transparent" />
               <circle
                 cx={px}
                 cy={py}
-                r={isSelected ? 22 : 18}
+                r={isSelected ? 24 : 22}
                 fill={p.color || '#f3f4f6'}
                 stroke={isSelected ? '#fff' : isDisabled ? '#666' : '#e2e8f0'}
                 strokeWidth={isSelected ? 2.5 : 1}
