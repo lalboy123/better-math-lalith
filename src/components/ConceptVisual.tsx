@@ -8,20 +8,39 @@ interface ConceptVisualProps {
   step: number;
 }
 
-const CONCEPT_NARRATION: Record<ConceptVisualProps['type'], string> = {
-  counting:
-    'Counting means finding out how many things there are. We count: one, two, three. The last number we say is how many there are in total!',
-  addition:
-    'Addition means putting things together. If you have 2 pencils and your friend gives you 1 more, you count them all together: 2 plus 1 equals 3. The plus sign means add. The answer is called the sum.',
-  subtraction:
-    'Subtraction means taking things away. If you have 4 pencils and you give 1 to a friend, you count how many are left: 4 minus 1 equals 3. The minus sign means subtract. The answer is called the difference.',
+const countingStepNarration = (step: number) => {
+  const parts: string[] = [];
+  if (step >= 1) parts.push('Counting means finding out how many things there are.');
+  if (step >= 2) parts.push('We say one for the first apple.');
+  if (step >= 3) parts.push('We count: one, two, three. That is 3 apples!');
+  if (step >= 4) parts.push('Numbers tell us how many.');
+  if (step >= 5) parts.push('The last number we say is how many there are in total!');
+  return parts.join(' ') || 'Counting means finding out how many things there are.';
+};
+
+const additionStepNarration = (step: number) => {
+  const parts: string[] = [];
+  if (step >= 1) parts.push('Addition means putting things together.');
+  if (step >= 2) parts.push('If you have 2 pencils and get 1 more, count them all together.');
+  if (step >= 3) parts.push('2 plus 1 equals 3. The plus sign means add.');
+  if (step >= 4) parts.push('The answer is called the sum.');
+  return parts.join(' ') || 'Addition means putting things together.';
+};
+
+const subtractionStepNarration = (step: number) => {
+  const parts: string[] = [];
+  if (step >= 1) parts.push('Subtraction means taking things away.');
+  if (step >= 2) parts.push('If you have 4 pencils and give 1 away, count how many are left.');
+  if (step >= 3) parts.push('4 minus 1 equals 3. The minus sign means subtract.');
+  if (step >= 4) parts.push('The answer is called the difference.');
+  return parts.join(' ') || 'Subtraction means taking things away.';
 };
 
 const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'counting') {
     return (
       <div className="flex flex-col items-center gap-8">
-        <ReadAloudButton text={CONCEPT_NARRATION.counting} />
+        <ReadAloudButton text={countingStepNarration(step)} />
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90 mb-4">
@@ -114,7 +133,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'addition') {
     return (
       <div className="flex flex-col items-center gap-8">
-        <ReadAloudButton text={CONCEPT_NARRATION.addition} />
+        <ReadAloudButton text={additionStepNarration(step)} />
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90">
@@ -181,7 +200,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'subtraction') {
     return (
       <div className="flex flex-col items-center gap-8">
-        <ReadAloudButton text={CONCEPT_NARRATION.subtraction} />
+        <ReadAloudButton text={subtractionStepNarration(step)} />
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90">

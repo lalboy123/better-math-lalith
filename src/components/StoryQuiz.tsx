@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   ChevronRight,
@@ -268,9 +268,13 @@ const buildEquationChips = (question: Question): EquationChip[] => {
       values.push(candidate);
     }
   }
-  return values
-    .map((value, id) => ({ id, value }))
-    .sort(() => Math.random() - 0.5);
+  const chips = values.map((value, id) => ({ id, value }));
+  // Fisher–Yates shuffle
+  for (let i = chips.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [chips[i], chips[j]] = [chips[j], chips[i]];
+  }
+  return chips;
 };
 
 const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
@@ -304,8 +308,16 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
 
   const question = questions[currentQuestion];
 
-  // Every 3rd question is open-ended: the student types the number instead of picking.
+  // Questions 3 and 6 (0-based indexes 2 and 5) are open-ended typed answers.
   const isOpenEnded = currentQuestion % 3 === 2;
+
+  const finishTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+    },
+    []
+  );
 
   const chips = useMemo(
     () => (needsEquation ? buildEquationChips(question) : []),
@@ -343,10 +355,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     setEquationChecked(true);
     setEquationCorrect(correct);
     if (!correct) {
-      setEquationAttempts(prev => prev + 1);
-      if (!wrongTopics.includes(lessonType)) {
-        setWrongTopics(prev => [...prev, lessonType]);
-      }
+      setEquationAttempts((prev) => prev + 1);
     }
   };
 
@@ -363,7 +372,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
   const checkAnswer = () => {
     setIsChecked(true);
     const isAnswerCorrect = effectiveAnswer === question.answer;
-    
+
     if (isAnswerCorrect) {
       // Award star even if they got it right on retry
       const newStars = [...stars];
@@ -372,18 +381,18 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
       setCurrentAffirmation(affirmations[currentQuestion % affirmations.length]);
       setShowAffirmation(true);
     } else {
-      if (!wrongTopics.includes(lessonType)) {
-        setWrongTopics(prev => [...prev, lessonType]);
+      // Only first wrong solve attempt counts toward "areas to practice"
+      if (wrongAttempts === 0 && !wrongTopics.includes(lessonType)) {
+        setWrongTopics((prev) => [...prev, lessonType]);
       }
-      setWrongAttempts(prev => prev + 1);
-      // Open the interactive guided practice for a wrong answer
+      setWrongAttempts((prev) => prev + 1);
       setShowGuidedPractice(true);
     }
   };
 
   const handleGuidedPracticeClose = () => {
     setShowGuidedPractice(false);
-    // Let the student try the question again right away
+    // Clear the attempt so the student can pick/type again and tap Check
     setSelectedAnswer(null);
     setTypedAnswer('');
     setIsChecked(false);
@@ -392,9 +401,9 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
   const nextQuestion = () => {
     setShowAffirmation(false);
     setWrongAttempts(0);
-    
+
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(prev => prev + 1);
+      setCurrentQuestion((prev) => prev + 1);
       setSelectedAnswer(null);
       setTypedAnswer('');
       setIsChecked(false);
@@ -404,19 +413,17 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
       setEquationCorrect(false);
       setEquationAttempts(0);
     } else {
-      const score = stars.filter(Boolean).length;
-      // Show rocket launch animation before completing
+      const finalStars = [...stars];
+      if (effectiveAnswer === question.answer) {
+        finalStars[currentQuestion] = true;
+      }
+      const score = finalStars.filter(Boolean).length;
       setShowRocketLaunch(true);
-      setTimeout(() => {
+      if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+      finishTimerRef.current = setTimeout(() => {
         onComplete(score, wrongTopics);
       }, 3000);
     }
-  };
-
-  const retryQuestion = () => {
-    setSelectedAnswer(null);
-    setTypedAnswer('');
-    setIsChecked(false);
   };
 
   const isCorrect = effectiveAnswer === question.answer;
@@ -428,7 +435,9 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
   if (showRocketLaunch) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col items-center justify-center animate-fade-in subtle-stars">
-        <p className="text-3xl font-bold text-foreground mb-8 animate-fade-in">All stars earned!</p>
+        <p className="text-3xl font-bold text-foreground mb-8 animate-fade-in">
+          {starsEarned === 8 ? 'All stars earned!' : `${starsEarned} stars earned!`}
+        </p>
         <div className="relative w-40 h-40 animate-rocket-launch-screen">
           <Rocket className="w-40 h-40 text-primary rotate-[-90deg]" />
           {/* Flame effect */}
@@ -648,31 +657,32 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
       )}
 
       {/* Actions */}
-      <div className="flex justify-center gap-4">
-        {!isChecked && effectiveAnswer !== null && (
-          <Button onClick={checkAnswer} size="lg">
-            Check
-          </Button>
+      <div className="flex flex-col items-center gap-3">
+        {!isChecked && !showGuidedPractice && wrongAttempts > 0 && effectiveAnswer === null && (
+          <p className="text-sm text-muted-foreground text-center">
+            Pick or type an answer, then tap Check to try again.
+          </p>
         )}
-        
-        {isChecked && !isCorrect && !showGuidedPractice && (
-          <Button onClick={retryQuestion} variant="outline" size="lg">
-            Try Again
-          </Button>
-        )}
-        
-        {isChecked && isCorrect && (
-          <Button onClick={nextQuestion} size="lg">
-            {currentQuestion < questions.length - 1 ? (
-              <>
-                Next
-                <ChevronRight className="w-5 h-5 ml-1" />
-              </>
-            ) : (
-              'Done'
-            )}
-          </Button>
-        )}
+        <div className="flex justify-center gap-4">
+          {!isChecked && effectiveAnswer !== null && (
+            <Button type="button" onClick={checkAnswer} size="lg">
+              Check
+            </Button>
+          )}
+
+          {isChecked && isCorrect && (
+            <Button type="button" onClick={nextQuestion} size="lg">
+              {currentQuestion < questions.length - 1 ? (
+                <>
+                  Next
+                  <ChevronRight className="w-5 h-5 ml-1" />
+                </>
+              ) : (
+                'Done'
+              )}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

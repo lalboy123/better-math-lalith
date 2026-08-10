@@ -111,7 +111,7 @@ const CountingSun: React.FC = () => {
               <h2 className="text-3xl font-semibold text-foreground">
                 Count from 1 to 9!
               </h2>
-              <ReadAloudButton text="1, 2, 3, 4, 5, 6, 7, 8, 9" />
+              <ReadAloudButton text="one, two, three, four, five, six, seven, eight, nine" />
             </div>
             <p className="text-muted-foreground mb-8 text-lg">
               Each number tells us how many. Tap the speaker to hear them all, or tap a number to hear it.

@@ -14,21 +14,24 @@ MathLift is a Vite + React web app packaged for iOS with Capacitor.
 - [x] Tablet solar system scales so outer planets fit
 - [x] Support + Privacy + Cookie pages linked from Home
 - [x] Placeholder planet-description stubs removed
+- [x] Teacher start level syncs student roster accurately
+- [x] Read-aloud TTS hardened for iOS WebViews (no mic permission needed)
+- [x] Story quiz retry / guided practice / scoring consistent
+- [x] `ITSAppUsesNonExemptEncryption` set for export compliance
 
 ## What you still must do on a Mac (required for App Store)
 
 Apple will **not** accept a website URL alone. You need a native iOS build:
 
-1. Install Xcode + CocoaPods on a Mac.
+1. Install Xcode on a Mac.
 2. From this repo:
    ```bash
    npm install
    npm run build
-   npx cap add ios          # first time only
    npm run cap:sync
    npx cap open ios
    ```
-3. In Xcode: set Team / Signing, bundle id `com.mathlift.app`, app icons (1024×1024), splash, privacy strings.
+3. In Xcode: set Team / Signing, bundle id `com.mathlift.app`, replace default app icons with a 1024×1024 MathLift icon, verify splash.
 4. Archive → Upload to App Store Connect.
 
 ## App Store Connect listing

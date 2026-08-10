@@ -8,8 +8,6 @@ interface QuizResultsProps {
   totalQuestions: number;
   areasToImprove: string[];
   lessonType: 'counting' | 'addition' | 'subtraction';
-  /** @deprecated External videos removed for App Store / offline reliability */
-  videoUrl?: string;
   onFinish: () => void;
   finishLabel?: string;
   onBack?: () => void;

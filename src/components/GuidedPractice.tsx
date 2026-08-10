@@ -83,8 +83,9 @@ const GuidedPractice: React.FC<GuidedPracticeProps> = ({
     <div className="fixed inset-0 bg-background/90 z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-card rounded-2xl p-6 md:p-8 border border-border max-w-lg w-full text-center relative">
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-3 right-3 w-10 h-10 min-h-[44px] min-w-[44px] rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Close"
         >
           ✕

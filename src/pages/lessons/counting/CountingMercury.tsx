@@ -150,7 +150,7 @@ const CountingMercury: React.FC = () => {
               Great Work on Mercury!
             </h2>
             <p className="text-xl text-muted-foreground mb-10">
-              You practiced counting! Watch this fun video:
+              You practiced counting! Celebrate what you learned:
             </p>
             
             <div className="mb-10 w-full px-2">
