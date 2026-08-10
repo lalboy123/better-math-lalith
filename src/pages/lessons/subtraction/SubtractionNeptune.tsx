@@ -8,6 +8,7 @@ import QuizResults from '@/components/QuizResults';
 import HomeButton from '@/components/HomeButton';
 import NavigationArrows from '@/components/NavigationArrows';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
 
 const SubtractionNeptune: React.FC = () => {
@@ -29,6 +30,8 @@ const SubtractionNeptune: React.FC = () => {
   });
   const [mcqSelected, setMcqSelected] = useState<number | null>(null);
   const [mcqChecked, setMcqChecked] = useState(false);
+  const [showGuided, setShowGuided] = useState(false);
+  const [wrongAttempts, setWrongAttempts] = useState(0);
   
   // Quiz results state
   const [quizScore, setQuizScore] = useState(0);
@@ -39,6 +42,15 @@ const SubtractionNeptune: React.FC = () => {
   const resetMcq = () => {
     setMcqSelected(null);
     setMcqChecked(false);
+    setShowGuided(false);
+  };
+
+  const checkMcq = () => {
+    setMcqChecked(true);
+    if (mcqSelected !== mcqAnswer) {
+      setWrongAttempts((prev) => prev + 1);
+      setShowGuided(true);
+    }
   };
   
   const handleQuizComplete = (score: number, areas: string[]) => {
@@ -91,17 +103,21 @@ const SubtractionNeptune: React.FC = () => {
             </div>
             
             {!mcqChecked && mcqSelected !== null && (
-              <Button onClick={() => setMcqChecked(true)} size="lg">
+              <Button onClick={checkMcq} size="lg">
                 Check
               </Button>
             )}
             
-            {mcqChecked && (
+            {mcqChecked && !showGuided && (
               <div className="space-y-4">
                 <p className={`text-xl font-semibold ${
                   mcqSelected === mcqAnswer ? 'text-success' : 'text-destructive'
                 }`}>
-                  {mcqSelected === mcqAnswer ? 'Great!' : `The answer is ${mcqAnswer}`}
+                  {mcqSelected === mcqAnswer
+                    ? 'Great!'
+                    : wrongAttempts >= 2
+                      ? `The answer is ${mcqAnswer}`
+                      : "Let's practice with pencils!"}
                 </p>
                 {mcqSelected !== mcqAnswer ? (
                   <Button variant="outline" size="lg" onClick={resetMcq}>
@@ -113,6 +129,19 @@ const SubtractionNeptune: React.FC = () => {
                   </Button>
                 )}
               </div>
+            )}
+
+            {showGuided && (
+              <GuidedPractice
+                lessonType="subtraction"
+                num1={mcqA}
+                num2={mcqB}
+                storyHint={`What is ${mcqA} minus ${mcqB}?`}
+                onClose={() => {
+                  setShowGuided(false);
+                  resetMcq();
+                }}
+              />
             )}
           </div>
         );

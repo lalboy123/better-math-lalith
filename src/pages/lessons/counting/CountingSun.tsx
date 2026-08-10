@@ -69,9 +69,12 @@ const CountingSun: React.FC = () => {
       case 0:
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
-            <h2 className="text-3xl font-semibold text-foreground mb-6">
-              Put Apples in the Basket
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <h2 className="text-3xl font-semibold text-foreground">
+                Put Apples in the Basket
+              </h2>
+              <ReadAloudButton text="Put apples in the basket. Tap an apple to add it." />
+            </div>
             <p className="text-muted-foreground mb-8 text-lg">
               Tap an apple to add it
             </p>

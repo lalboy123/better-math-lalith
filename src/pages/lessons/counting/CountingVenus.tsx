@@ -9,8 +9,8 @@ import HomeButton from '@/components/HomeButton';
 import NavigationArrows from '@/components/NavigationArrows';
 import PlanetTransition from '@/components/PlanetTransition';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
-import { Check, X } from 'lucide-react';
 import {
   getNextPlanet,
   getLessonRoute,
@@ -38,6 +38,8 @@ const CountingVenus: React.FC = () => {
   });
   const [mcqAnswer, setMcqAnswer] = useState<number | null>(null);
   const [mcqChecked, setMcqChecked] = useState(false);
+  const [showGuided, setShowGuided] = useState(false);
+  const [wrongAttempts, setWrongAttempts] = useState(0);
   
   // Quiz results state
   const [quizScore, setQuizScore] = useState(0);
@@ -48,11 +50,16 @@ const CountingVenus: React.FC = () => {
   const checkMcq = (answer: number) => {
     setMcqAnswer(answer);
     setMcqChecked(true);
+    if (answer !== mcqQuestion.count) {
+      setWrongAttempts((prev) => prev + 1);
+      setShowGuided(true);
+    }
   };
   
   const resetMcq = () => {
     setMcqAnswer(null);
     setMcqChecked(false);
+    setShowGuided(false);
   };
   
   const handleQuizComplete = (score: number, areas: string[]) => {
@@ -131,12 +138,16 @@ const CountingVenus: React.FC = () => {
               ))}
             </div>
             
-            {mcqChecked && (
+            {mcqChecked && !showGuided && (
               <div className="mt-8 space-y-4">
                 <p className={`text-xl font-semibold ${
                   mcqAnswer === mcqQuestion.count ? 'text-success' : 'text-destructive'
                 }`}>
-                  {mcqAnswer === mcqQuestion.count ? 'Great!' : `The answer is ${mcqQuestion.count}`}
+                  {mcqAnswer === mcqQuestion.count
+                    ? 'Great!'
+                    : wrongAttempts >= 2
+                      ? `The answer is ${mcqQuestion.count}`
+                      : "Let's practice counting with pencils!"}
                 </p>
                 {mcqAnswer !== mcqQuestion.count ? (
                   <Button variant="outline" size="lg" onClick={resetMcq}>
@@ -148,6 +159,18 @@ const CountingVenus: React.FC = () => {
                   </Button>
                 )}
               </div>
+            )}
+
+            {showGuided && (
+              <GuidedPractice
+                lessonType="counting"
+                num1={mcqQuestion.count}
+                storyHint="How many circles?"
+                onClose={() => {
+                  setShowGuided(false);
+                  resetMcq();
+                }}
+              />
             )}
           </div>
         );

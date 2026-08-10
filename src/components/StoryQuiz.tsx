@@ -742,6 +742,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
           lessonType={lessonType}
           num1={question.num1 || question.answer}
           num2={question.num2}
+          storyHint={`${question.story} ${question.question}`}
           onClose={handleGuidedPracticeClose}
         />
       )}

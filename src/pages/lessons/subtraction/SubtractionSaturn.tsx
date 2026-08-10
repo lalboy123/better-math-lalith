@@ -9,6 +9,8 @@ import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
 import LessonCelebration from '@/components/LessonCelebration';
+import ReadAloudButton from '@/components/ReadAloudButton';
+import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
 import { Check, X, Play, RotateCcw } from 'lucide-react';
 
@@ -32,6 +34,8 @@ const SubtractionSaturn: React.FC = () => {
   const [activity2Removed, setActivity2Removed] = useState(0);
   const [activity2Target] = useState(4);
   const [activity2Checked, setActivity2Checked] = useState(false);
+  const [showGuided, setShowGuided] = useState(false);
+  const activity2Start = 7;
 
   const totalSteps = 4;
 
@@ -70,12 +74,16 @@ const SubtractionSaturn: React.FC = () => {
 
   const checkActivity2 = () => {
     setActivity2Checked(true);
+    if (activity2Pencils !== activity2Target) {
+      setShowGuided(true);
+    }
   };
 
   const resetActivity2 = () => {
-    setActivity2Pencils(7);
+    setActivity2Pencils(activity2Start);
     setActivity2Removed(0);
     setActivity2Checked(false);
+    setShowGuided(false);
   };
 
   const goToNextPlanet = () => {
@@ -162,9 +170,12 @@ const SubtractionSaturn: React.FC = () => {
       case 1:
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
-            <h2 className="text-3xl font-semibold text-foreground mb-6">
-              Take Away Pencils
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <h2 className="text-3xl font-semibold text-foreground">
+                Take Away Pencils
+              </h2>
+              <ReadAloudButton text="Tap pencils to take them away. Start with 6 pencils." />
+            </div>
             <p className="text-lg text-muted-foreground mb-10">
               Tap pencils to take them away
             </p>
@@ -202,9 +213,12 @@ const SubtractionSaturn: React.FC = () => {
       case 2:
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
-            <h2 className="text-3xl font-semibold text-foreground mb-4">
-              Leave {activity2Target} Pencils
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <h2 className="text-3xl font-semibold text-foreground">
+                Leave {activity2Target} Pencils
+              </h2>
+              <ReadAloudButton text={`Take away until you have ${activity2Target} pencils. You start with ${activity2Start}.`} />
+            </div>
             <p className="text-lg text-muted-foreground mb-8">
               Take away until you have {activity2Target}
             </p>
@@ -242,7 +256,7 @@ const SubtractionSaturn: React.FC = () => {
               <Button onClick={checkActivity2} size="lg">Check</Button>
             )}
             
-            {activity2Checked && (
+            {activity2Checked && !showGuided && (
               <div className="flex flex-col items-center gap-4">
                 <div className={`flex items-center gap-2 ${
                   activity2Pencils === activity2Target ? 'text-success' : 'text-destructive'
@@ -256,7 +270,7 @@ const SubtractionSaturn: React.FC = () => {
                     <>
                       <X className="w-8 h-8" />
                       <span className="text-xl font-semibold">
-                        You need {activity2Target} left
+                        Let's practice with pencils!
                       </span>
                     </>
                   )}
@@ -267,6 +281,19 @@ const SubtractionSaturn: React.FC = () => {
                   </Button>
                 )}
               </div>
+            )}
+
+            {showGuided && (
+              <GuidedPractice
+                lessonType="subtraction"
+                num1={activity2Start}
+                num2={activity2Start - activity2Target}
+                storyHint={`Leave ${activity2Target} pencils. You start with ${activity2Start}.`}
+                onClose={() => {
+                  setShowGuided(false);
+                  resetActivity2();
+                }}
+              />
             )}
           </div>
         );

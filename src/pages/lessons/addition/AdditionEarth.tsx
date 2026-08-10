@@ -9,6 +9,8 @@ import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
 import LessonCelebration from '@/components/LessonCelebration';
+import ReadAloudButton from '@/components/ReadAloudButton';
+import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
 import { Check, X, Play, RotateCcw } from 'lucide-react';
 
@@ -34,6 +36,7 @@ const AdditionEarth: React.FC = () => {
   const [activity2Available, setActivity2Available] = useState(6);
   const [activity2Target] = useState(6);
   const [activity2Checked, setActivity2Checked] = useState(false);
+  const [showGuided, setShowGuided] = useState(false);
 
   const totalSteps = 4;
 
@@ -72,12 +75,16 @@ const AdditionEarth: React.FC = () => {
 
   const checkActivity2 = () => {
     setActivity2Checked(true);
+    if (activity2Left + activity2Right !== activity2Target) {
+      setShowGuided(true);
+    }
   };
 
   const resetActivity2 = () => {
     setActivity2Right(0);
     setActivity2Available(6);
     setActivity2Checked(false);
+    setShowGuided(false);
   };
 
   const goToNextPlanet = () => {
@@ -158,9 +165,12 @@ const AdditionEarth: React.FC = () => {
       case 1:
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
-            <h2 className="text-3xl font-semibold text-foreground mb-6">
-              Add Pencils
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <h2 className="text-3xl font-semibold text-foreground">
+                Add Pencils
+              </h2>
+              <ReadAloudButton text="Tap pencils to add them. Start with 3, then add more." />
+            </div>
             <p className="text-lg text-muted-foreground mb-10">
               Tap pencils to add them
             </p>
@@ -200,9 +210,12 @@ const AdditionEarth: React.FC = () => {
       case 2:
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
-            <h2 className="text-3xl font-semibold text-foreground mb-4">
-              Make {activity2Target} Pencils
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <h2 className="text-3xl font-semibold text-foreground">
+                Make {activity2Target} Pencils
+              </h2>
+              <ReadAloudButton text={`Add until you have ${activity2Target} pencils. You start with ${activity2Left}.`} />
+            </div>
             <p className="text-lg text-muted-foreground mb-8">
               Add until you have {activity2Target}
             </p>
@@ -243,7 +256,7 @@ const AdditionEarth: React.FC = () => {
               </>
             )}
             
-            {activity2Checked && (
+            {activity2Checked && !showGuided && (
               <div className="flex flex-col items-center gap-4">
                 <div className={`flex items-center gap-2 ${
                   activity2Left + activity2Right === activity2Target ? 'text-success' : 'text-destructive'
@@ -257,7 +270,7 @@ const AdditionEarth: React.FC = () => {
                     <>
                       <X className="w-8 h-8" />
                       <span className="text-xl font-semibold">
-                        You need {activity2Target - activity2Left} more
+                        Let's practice with pencils!
                       </span>
                     </>
                   )}
@@ -268,6 +281,19 @@ const AdditionEarth: React.FC = () => {
                   </Button>
                 )}
               </div>
+            )}
+
+            {showGuided && (
+              <GuidedPractice
+                lessonType="addition"
+                num1={activity2Left}
+                num2={activity2Target - activity2Left}
+                storyHint={`Make ${activity2Target} pencils. You start with ${activity2Left}.`}
+                onClose={() => {
+                  setShowGuided(false);
+                  resetActivity2();
+                }}
+              />
             )}
           </div>
         );

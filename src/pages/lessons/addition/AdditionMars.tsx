@@ -10,6 +10,8 @@ import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import EquationBuilder from '@/components/EquationBuilder';
+import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
@@ -26,6 +28,12 @@ const AdditionMars: React.FC = () => {
   const [wordRight, setWordRight] = useState(0);
   const [wordAvailable, setWordAvailable] = useState(5);
   const [wordChecked, setWordChecked] = useState(false);
+  const [wordPhase, setWordPhase] = useState<'equation' | 'solve'>('equation');
+  const [showGuided, setShowGuided] = useState(false);
+
+  const wordNeed = wordTarget - wordLeft;
+  const wordStoryText =
+    `Emma has ${wordLeft} pencils. She wants ${wordTarget} pencils total. How many more does she need?`;
 
   const totalSteps = 2;
 
@@ -47,12 +55,16 @@ const AdditionMars: React.FC = () => {
 
   const checkWord = () => {
     setWordChecked(true);
+    if (wordLeft + wordRight !== wordTarget) {
+      setShowGuided(true);
+    }
   };
 
   const resetWord = () => {
     setWordRight(0);
     setWordAvailable(5);
     setWordChecked(false);
+    setShowGuided(false);
   };
 
   const goToNextPlanet = () => {
@@ -90,12 +102,35 @@ const AdditionMars: React.FC = () => {
         );
 
       case 1:
+        if (wordPhase === 'equation') {
+          return (
+            <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
+              <h2 className="text-3xl font-semibold text-foreground mb-4">
+                The Art Shop
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                First build the equation, then solve with pencils!
+              </p>
+              <EquationBuilder
+                num1={wordLeft}
+                num2={wordNeed}
+                operator="+"
+                questionText={wordStoryText}
+                onComplete={() => {
+                  resetWord();
+                  setWordPhase('solve');
+                }}
+              />
+            </div>
+          );
+        }
+
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
             <h2 className="text-3xl font-semibold text-foreground mb-4">
               The Art Shop
             </h2>
-            <div className="bg-card rounded-xl p-8 border border-border mb-8 max-w-lg mx-auto">
+            <div className="bg-card rounded-xl p-8 border border-border mb-6 max-w-lg mx-auto">
               <div className="flex items-start justify-between gap-3">
                 <div className="text-left flex-1">
                   <p className="text-lg text-foreground">
@@ -108,11 +143,15 @@ const AdditionMars: React.FC = () => {
                     How many more does she need?
                   </p>
                 </div>
-                <ReadAloudButton
-                  text={`Emma has ${wordLeft} pencils. She wants ${wordTarget} pencils total. How many more does she need?`}
-                  className="shrink-0"
-                />
+                <ReadAloudButton text={wordStoryText} className="shrink-0" />
               </div>
+            </div>
+
+            <div className="rounded-xl bg-mars/10 border border-mars/20 px-4 py-3 mb-6 max-w-sm mx-auto">
+              <p className="text-xs text-muted-foreground mb-1">Your equation</p>
+              <p className="text-2xl font-bold text-mars">
+                {wordLeft} + {wordNeed} = ?
+              </p>
             </div>
             
             <div className="flex justify-center gap-8 mb-8">
@@ -149,7 +188,7 @@ const AdditionMars: React.FC = () => {
               </>
             )}
             
-            {wordChecked && (
+            {wordChecked && !showGuided && (
               <div className="flex flex-col items-center gap-4">
                 <div className={`flex items-center gap-2 ${
                   wordLeft + wordRight === wordTarget ? 'text-success' : 'text-destructive'
@@ -163,7 +202,7 @@ const AdditionMars: React.FC = () => {
                     <>
                       <X className="w-8 h-8" />
                       <span className="text-xl font-semibold">
-                        Emma needs {wordTarget - wordLeft} more pencils
+                        Let's practice with pencils!
                       </span>
                     </>
                   )}
@@ -178,6 +217,19 @@ const AdditionMars: React.FC = () => {
                   </Button>
                 )}
               </div>
+            )}
+
+            {showGuided && (
+              <GuidedPractice
+                lessonType="addition"
+                num1={wordLeft}
+                num2={wordNeed}
+                storyHint={wordStoryText}
+                onClose={() => {
+                  setShowGuided(false);
+                  resetWord();
+                }}
+              />
             )}
           </div>
         );

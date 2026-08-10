@@ -10,6 +10,8 @@ import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
 import HomeButton from '@/components/HomeButton';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import EquationBuilder from '@/components/EquationBuilder';
+import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
@@ -21,10 +23,17 @@ const SubtractionUranus: React.FC = () => {
   const [showTransition, setShowTransition] = useState(false);
   
   // Word problem state
+  const [wordStart] = useState(8);
   const [wordPencils, setWordPencils] = useState(8);
   const [wordRemoved, setWordRemoved] = useState(0);
   const [wordTarget] = useState(5);
   const [wordChecked, setWordChecked] = useState(false);
+  const [wordPhase, setWordPhase] = useState<'equation' | 'solve'>('equation');
+  const [showGuided, setShowGuided] = useState(false);
+
+  const wordGiveAway = wordStart - wordTarget;
+  const wordStoryText =
+    `Mr. Chen has ${wordStart} pencils. He wants to keep ${wordTarget} pencils. How many can he give away?`;
 
   const totalSteps = 2;
 
@@ -46,12 +55,16 @@ const SubtractionUranus: React.FC = () => {
 
   const checkWord = () => {
     setWordChecked(true);
+    if (wordPencils !== wordTarget) {
+      setShowGuided(true);
+    }
   };
 
   const resetWord = () => {
-    setWordPencils(8);
+    setWordPencils(wordStart);
     setWordRemoved(0);
     setWordChecked(false);
+    setShowGuided(false);
   };
 
   const goToNextPlanet = () => {
@@ -89,16 +102,39 @@ const SubtractionUranus: React.FC = () => {
         );
 
       case 1:
+        if (wordPhase === 'equation') {
+          return (
+            <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
+              <h2 className="text-3xl font-semibold text-foreground mb-4">
+                The Classroom
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                First build the equation, then solve with pencils!
+              </p>
+              <EquationBuilder
+                num1={wordStart}
+                num2={wordGiveAway}
+                operator="−"
+                questionText={wordStoryText}
+                onComplete={() => {
+                  resetWord();
+                  setWordPhase('solve');
+                }}
+              />
+            </div>
+          );
+        }
+
         return (
           <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
             <h2 className="text-3xl font-semibold text-foreground mb-4">
               The Classroom
             </h2>
-            <div className="bg-card rounded-xl p-8 border border-border mb-8 max-w-lg mx-auto">
+            <div className="bg-card rounded-xl p-8 border border-border mb-6 max-w-lg mx-auto">
               <div className="flex items-start justify-between gap-3">
                 <div className="text-left flex-1">
                   <p className="text-lg text-foreground">
-                    Mr. Chen has <span className="font-bold text-uranus">8 pencils</span>.
+                    Mr. Chen has <span className="font-bold text-uranus">{wordStart} pencils</span>.
                   </p>
                   <p className="text-lg text-foreground mt-3">
                     He wants to keep <span className="font-bold text-uranus">{wordTarget} pencils</span>.
@@ -107,11 +143,15 @@ const SubtractionUranus: React.FC = () => {
                     How many can he give away?
                   </p>
                 </div>
-                <ReadAloudButton
-                  text={`Mr. Chen has 8 pencils. He wants to keep ${wordTarget} pencils. How many can he give away?`}
-                  className="shrink-0"
-                />
+                <ReadAloudButton text={wordStoryText} className="shrink-0" />
               </div>
+            </div>
+
+            <div className="rounded-xl bg-uranus/10 border border-uranus/20 px-4 py-3 mb-6 max-w-sm mx-auto">
+              <p className="text-xs text-muted-foreground mb-1">Your equation</p>
+              <p className="text-2xl font-bold text-uranus">
+                {wordStart} − {wordGiveAway} = ?
+              </p>
             </div>
             
             <div className="flex justify-center gap-8 mb-8">
@@ -145,7 +185,7 @@ const SubtractionUranus: React.FC = () => {
               <Button onClick={checkWord} size="lg">Check</Button>
             )}
             
-            {wordChecked && (
+            {wordChecked && !showGuided && (
               <div className="flex flex-col items-center gap-4">
                 <div className={`flex items-center gap-2 ${
                   wordPencils === wordTarget ? 'text-success' : 'text-destructive'
@@ -159,7 +199,7 @@ const SubtractionUranus: React.FC = () => {
                     <>
                       <X className="w-8 h-8" />
                       <span className="text-xl font-semibold">
-                        Mr. Chen needs to give away {8 - wordTarget}
+                        Let's practice with pencils!
                       </span>
                     </>
                   )}
@@ -174,6 +214,19 @@ const SubtractionUranus: React.FC = () => {
                   </Button>
                 )}
               </div>
+            )}
+
+            {showGuided && (
+              <GuidedPractice
+                lessonType="subtraction"
+                num1={wordStart}
+                num2={wordGiveAway}
+                storyHint={wordStoryText}
+                onClose={() => {
+                  setShowGuided(false);
+                  resetWord();
+                }}
+              />
             )}
           </div>
         );
