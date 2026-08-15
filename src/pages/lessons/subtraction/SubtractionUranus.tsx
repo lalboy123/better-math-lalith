@@ -3,12 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/context/GameContext';
 import { useLessonStep } from '@/hooks/useLessonStep';
-import NavigationArrows from '@/components/NavigationArrows';
 import ConceptVisual from '@/components/ConceptVisual';
 import Pencil from '@/components/Pencil';
 import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
-import HomeButton from '@/components/HomeButton';
+import LessonShell from '@/components/LessonShell';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import EquationBuilder from '@/components/EquationBuilder';
 import GuidedPractice from '@/components/GuidedPractice';
@@ -38,7 +37,7 @@ const SubtractionUranus: React.FC = () => {
   const totalSteps = 2;
 
   useEffect(() => {
-    if (step === 0 && conceptStep < 5) {
+    if (step === 0 && conceptStep < 6) {
       const timer = setTimeout(() => {
         setConceptStep(prev => prev + 1);
       }, 3000);
@@ -237,32 +236,16 @@ const SubtractionUranus: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex flex-col p-4 md:p-8">
-      <HomeButton />
-      
-      <div className="flex justify-center gap-2 mb-6">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              i === step ? 'bg-uranus' : i < step ? 'bg-uranus/50' : 'bg-muted'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto">
-        {renderStep()}
-      </div>
-
-      <NavigationArrows
-        onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
-        onNext={step < totalSteps - 1 ? () => setStep(step + 1) : undefined}
-        showNext={step < totalSteps - 1}
-        backLabel="Back"
-        nextLabel="Next"
-      />
-    </div>
+    <LessonShell
+      planet="uranus"
+      totalSteps={totalSteps}
+      step={step}
+      onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
+      onNext={step < totalSteps - 1 ? () => setStep(step + 1) : undefined}
+      showNext={step < totalSteps - 1}
+    >
+      {renderStep()}
+    </LessonShell>
   );
 };
 

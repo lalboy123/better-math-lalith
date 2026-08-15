@@ -3,13 +3,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/context/GameContext';
 import { useLessonStep } from '@/hooks/useLessonStep';
-import NavigationArrows from '@/components/NavigationArrows';
 import Apple from '@/components/Apple';
 import Basket from '@/components/Basket';
 import Counter from '@/components/Counter';
 import PlanetTransition from '@/components/PlanetTransition';
-import HomeButton from '@/components/HomeButton';
 import LessonCelebration from '@/components/LessonCelebration';
+import LessonShell from '@/components/LessonShell';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
@@ -132,7 +131,7 @@ const CountingMercury: React.FC = () => {
                         <X className="w-8 h-8" />
                         <span className="text-xl font-semibold">Try again!</span>
                       </div>
-                      <Button onClick={resetWordProblem} variant="outline" size="lg">
+                      <Button type="button" onClick={resetWordProblem} variant="outline" size="lg" className="min-h-[48px] relative z-20">
                         Try Again
                       </Button>
                     </div>
@@ -169,32 +168,16 @@ const CountingMercury: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex flex-col p-4 md:p-8">
-      <HomeButton />
-      
-      <div className="flex justify-center gap-2 mb-6">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              i === step ? 'bg-mercury' : i < step ? 'bg-mercury/50' : 'bg-muted'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto">
-        {renderStep()}
-      </div>
-
-      <NavigationArrows
-        onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
-        onNext={step < totalSteps - 1 && wordProblemCorrect ? () => setStep(step + 1) : undefined}
-        showNext={step < totalSteps - 1 && wordProblemCorrect}
-        backLabel="Back"
-        nextLabel="Next"
-      />
-    </div>
+    <LessonShell
+      planet="mercury"
+      totalSteps={totalSteps}
+      step={step}
+      onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
+      onNext={step < totalSteps - 1 && wordProblemCorrect ? () => setStep(step + 1) : undefined}
+      showNext={step < totalSteps - 1 && wordProblemCorrect}
+    >
+      {renderStep()}
+    </LessonShell>
   );
 };
 

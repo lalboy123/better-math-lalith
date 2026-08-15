@@ -39,8 +39,7 @@ const subtractionStepNarration = (step: number) => {
 const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
   if (type === 'counting') {
     return (
-      <div className="flex flex-col items-center gap-8">
-        <ReadAloudButton text={countingStepNarration(step)} />
+      <div className="flex flex-col items-center gap-4 sm:gap-8 w-full px-1">
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90 mb-4">
@@ -104,7 +103,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
         )}
 
         {step >= 6 && (
-          <div className="animate-concept-delay-5 bg-card rounded-xl p-6 border border-border">
+          <div className="animate-concept-delay-5 bg-card rounded-xl p-3 sm:p-6 border border-border w-full max-w-md">
             <p className="text-muted-foreground mb-4 text-center">Circle diagrams help us visualize counting:</p>
             <div className="flex justify-center gap-8">
               <div className="flex flex-col items-center">
@@ -126,14 +125,19 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
             </div>
           </div>
         )}
+        {step >= 7 && (
+          <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
+            <ReadAloudButton text={countingStepNarration(6)} />
+            <span className="text-xs sm:text-sm text-muted-foreground">Tap to hear this again</span>
+          </div>
+        )}
       </div>
     );
   }
   
   if (type === 'addition') {
     return (
-      <div className="flex flex-col items-center gap-8">
-        <ReadAloudButton text={additionStepNarration(step)} />
+      <div className="flex flex-col items-center gap-4 sm:gap-8 w-full px-1">
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90">
@@ -193,14 +197,19 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
             </p>
           </div>
         )}
+        {step >= 6 && (
+          <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
+            <ReadAloudButton text={additionStepNarration(5)} />
+            <span className="text-xs sm:text-sm text-muted-foreground">Tap to hear this again</span>
+          </div>
+        )}
       </div>
     );
   }
   
   if (type === 'subtraction') {
     return (
-      <div className="flex flex-col items-center gap-8">
-        <ReadAloudButton text={subtractionStepNarration(step)} />
+      <div className="flex flex-col items-center gap-4 sm:gap-8 w-full px-1">
         {step >= 1 && (
           <div className="animate-concept text-center">
             <p className="text-xl text-foreground/90">
@@ -265,6 +274,12 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
             <p className="text-muted-foreground mt-2">
               The answer is called the <span className="font-semibold text-accent">difference</span>
             </p>
+          </div>
+        )}
+        {step >= 6 && (
+          <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
+            <ReadAloudButton text={subtractionStepNarration(5)} />
+            <span className="text-xs sm:text-sm text-muted-foreground">Tap to hear this again</span>
           </div>
         )}
       </div>

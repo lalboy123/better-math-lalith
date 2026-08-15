@@ -3,14 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/context/GameContext';
 import { useLessonStep } from '@/hooks/useLessonStep';
-import NavigationArrows from '@/components/NavigationArrows';
 import Apple from '@/components/Apple';
 import Basket from '@/components/Basket';
 import Counter from '@/components/Counter';
 import ConceptVisual from '@/components/ConceptVisual';
 import PlanetTransition from '@/components/PlanetTransition';
-import HomeButton from '@/components/HomeButton';
 import LessonCelebration from '@/components/LessonCelebration';
+import LessonShell from '@/components/LessonShell';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { speak } from '@/lib/speech';
@@ -27,7 +26,7 @@ const CountingSun: React.FC = () => {
   const totalSteps = 4;
 
   useEffect(() => {
-    if (step === 1 && conceptStep < 6) {
+    if (step === 1 && conceptStep < 7) {
       const timer = setTimeout(() => {
         setConceptStep(prev => prev + 1);
       }, 3000);
@@ -68,29 +67,29 @@ const CountingSun: React.FC = () => {
     switch (step) {
       case 0:
         return (
-          <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <h2 className="text-3xl font-semibold text-foreground">
+          <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1 py-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mb-3 sm:mb-6 px-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground">
                 Put Apples in the Basket
               </h2>
               <ReadAloudButton text="Put apples in the basket. Tap an apple to add it." />
             </div>
-            <p className="text-muted-foreground mb-8 text-lg">
+            <p className="text-muted-foreground mb-4 sm:mb-6 text-base sm:text-lg">
               Tap an apple to add it
             </p>
             
-            <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-center gap-4 sm:gap-6">
               <Counter count={basketCount} label="Apples" />
               
               <Basket>
                 {Array.from({ length: basketCount }).map((_, i) => (
-                  <Apple key={i} size="lg" className="pointer-events-none" />
+                  <Apple key={i} size="sm" className="pointer-events-none" />
                 ))}
               </Basket>
               
-              <div className="flex flex-wrap justify-center gap-3 max-w-md">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-sm">
                 {Array.from({ length: availableApples }).map((_, i) => (
-                  <Apple key={i} onClick={addAppleToBasket} size="lg" />
+                  <Apple key={i} onClick={addAppleToBasket} size="md" />
                 ))}
               </div>
             </div>
@@ -99,8 +98,8 @@ const CountingSun: React.FC = () => {
 
       case 1:
         return (
-          <div className="text-center max-w-3xl mx-auto flex flex-col items-center justify-center flex-1 py-8">
-            <h2 className="text-3xl font-semibold text-foreground mb-10">
+          <div className="text-center max-w-3xl mx-auto flex flex-col items-center justify-center flex-1 py-2 sm:py-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground mb-4 sm:mb-8 px-2">
               What is Counting?
             </h2>
             <ConceptVisual type="counting" step={conceptStep} />
@@ -109,30 +108,30 @@ const CountingSun: React.FC = () => {
 
       case 2:
         return (
-          <div className="text-center max-w-3xl mx-auto flex flex-col items-center justify-center flex-1 py-8 animate-fade-in">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <h2 className="text-3xl font-semibold text-foreground">
+          <div className="text-center max-w-3xl mx-auto flex flex-col items-center justify-center flex-1 py-2 sm:py-6 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mb-3 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground px-2">
                 Count from 1 to 9!
               </h2>
               <ReadAloudButton text="one, two, three, four, five, six, seven, eight, nine" />
             </div>
-            <p className="text-muted-foreground mb-8 text-lg">
+            <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-lg px-2">
               Each number tells us how many. Tap the speaker to hear them all, or tap a number to hear it.
             </p>
-            <div className="grid grid-cols-3 gap-6 max-w-2xl mb-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 w-full max-w-2xl mb-4">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
                 const word = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][num - 1];
                 return (
                   <div
                     key={num}
-                    className="bg-card rounded-xl p-4 border border-border flex flex-col items-center gap-3 animate-concept"
+                    className="bg-card rounded-xl p-2 sm:p-4 border border-border flex flex-col items-center gap-1.5 sm:gap-3 animate-concept"
                     style={{ animationDelay: `${(num - 1) * 0.15}s` }}
                   >
                     <button
                       type="button"
                       onClick={() => speak(word)}
                       aria-label={`Hear the number ${num}`}
-                      className="text-4xl font-bold text-primary rounded-lg px-3 leading-none transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="text-2xl sm:text-4xl font-bold text-primary rounded-lg px-2 sm:px-3 leading-none transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer touch-manipulation"
                     >
                       {num}
                     </button>
@@ -177,32 +176,16 @@ const CountingSun: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex flex-col p-4 md:p-8">
-      <HomeButton />
-      
-      <div className="flex justify-center gap-2 mb-6">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              i === step ? 'bg-sun' : i < step ? 'bg-sun/50' : 'bg-muted'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto">
-        {renderStep()}
-      </div>
-
-      <NavigationArrows
-        onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
-        onNext={step < 3 ? () => setStep(step + 1) : undefined}
-        showNext={step < 3}
-        backLabel="Back"
-        nextLabel="Next"
-      />
-    </div>
+    <LessonShell
+      planet="sun"
+      totalSteps={totalSteps}
+      step={step}
+      onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
+      onNext={step < 3 ? () => setStep(step + 1) : undefined}
+      showNext={step < 3}
+    >
+      {renderStep()}
+    </LessonShell>
   );
 };
 
