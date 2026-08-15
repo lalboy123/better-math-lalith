@@ -5,8 +5,7 @@ import { useGame } from '@/context/GameContext';
 import { useLessonStep } from '@/hooks/useLessonStep';
 import StoryQuiz from '@/components/StoryQuiz';
 import QuizResults from '@/components/QuizResults';
-import HomeButton from '@/components/HomeButton';
-import NavigationArrows from '@/components/NavigationArrows';
+import LessonShell from '@/components/LessonShell';
 import PlanetTransition from '@/components/PlanetTransition';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import GuidedPractice from '@/components/GuidedPractice';
@@ -213,30 +212,15 @@ const CountingVenus: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background subtle-stars flex flex-col p-4 md:p-8">
-      <HomeButton />
-      
-      <div className="flex justify-center gap-2 mb-6">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              i === step ? 'bg-venus' : i < step ? 'bg-venus/50' : 'bg-muted'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="flex-1 flex flex-col w-full max-w-4xl mx-auto">
-        {renderStep()}
-      </div>
-
-      <NavigationArrows
-        onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
-        showNext={false}
-        backLabel="Back"
-      />
-    </div>
+    <LessonShell
+      planet="venus"
+      totalSteps={totalSteps}
+      step={step}
+      onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
+      showNext={false}
+    >
+      {renderStep()}
+    </LessonShell>
   );
 };
 

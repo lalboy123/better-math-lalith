@@ -49,27 +49,46 @@ const QuizResults: React.FC<QuizResultsProps> = ({
   };
 
   return (
-    <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1 pb-28">
-      <h2 className="text-3xl font-semibold text-foreground mb-4">Congratulations!</h2>
-      <p className="text-xl text-muted-foreground mb-8">
+    <div className="text-center animate-fade-in flex flex-col items-center justify-center flex-1 py-4">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground mb-3 sm:mb-4 px-2">Congratulations!</h2>
+      <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8 px-2">
         You completed the {lessonType} quiz!
       </p>
 
-      <div className="mb-8 w-full px-2">
+      <div className="mb-6 sm:mb-8 w-full px-2">
         <LessonCelebration lessonType={lessonType} />
       </div>
 
-      <div className="fixed bottom-24 right-4 sm:right-8 z-20">
+      <div className="flex flex-col items-stretch gap-3 w-full max-w-xs mx-auto">
         <Button
           type="button"
           onClick={() => setShowResults(true)}
           variant="outline"
           size="lg"
-          className="gap-2 min-h-[48px] shadow-md bg-card/95"
+          className="gap-2 min-h-[48px] cursor-pointer touch-manipulation"
         >
           <Trophy className="w-5 h-5" />
           View My Score
         </Button>
+        <Button
+          type="button"
+          onClick={onFinish}
+          size="lg"
+          className="min-h-[48px] cursor-pointer touch-manipulation"
+        >
+          {finishLabel}
+        </Button>
+        {onBack && (
+          <Button
+            type="button"
+            onClick={onBack}
+            size="lg"
+            variant="outline"
+            className="min-h-[48px] cursor-pointer touch-manipulation"
+          >
+            Finish &amp; Return to Planets
+          </Button>
+        )}
       </div>
 
       {showResults && (
@@ -132,17 +151,6 @@ const QuizResults: React.FC<QuizResultsProps> = ({
           </div>
         </div>
       )}
-
-      <div className="flex flex-wrap gap-3 justify-center">
-        {onBack && (
-          <Button type="button" onClick={onBack} size="lg" variant="outline" className="min-h-[48px]">
-            Finish &amp; Return to Planets
-          </Button>
-        )}
-        <Button type="button" onClick={onFinish} size="lg" className="min-h-[48px]">
-          {finishLabel}
-        </Button>
-      </div>
     </div>
   );
 };
