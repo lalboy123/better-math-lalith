@@ -14,6 +14,7 @@ import {
 import GuidedPractice from '@/components/GuidedPractice';
 import NumberPad from '@/components/NumberPad';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import { nativeHaptic } from '@/lib/native';
 
 interface Question {
   story: string;
@@ -359,6 +360,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
         : v1 === question.num1 && v2 === question.num2;
     setEquationChecked(true);
     setEquationCorrect(correct);
+    nativeHaptic(correct ? 'success' : 'error');
     if (!correct) {
       setEquationAttempts((prev) => prev + 1);
       if (!wrongTopics.includes(lessonType)) {
@@ -391,6 +393,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     setIsChecked(true);
     const isAnswerCorrect = effectiveAnswer === question.answer;
 
+    nativeHaptic(isAnswerCorrect ? 'success' : 'error');
     if (isAnswerCorrect) {
       // Award star even if they got it right on retry
       const newStars = [...stars];

@@ -144,11 +144,19 @@ const PlanetSelectPage: React.FC = () => {
         />
       </div>
 
-      <p className="text-sm text-muted-foreground mb-20 text-center max-w-md">
+      <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
         {completedList.length === 0
           ? 'Pick any unlocked planet to begin. Your teacher can open more planets anytime.'
           : 'Replay earlier planets or jump ahead to any planet your teacher has unlocked.'}
       </p>
+
+      <button
+        type="button"
+        onClick={() => navigate('/settings')}
+        className="mb-16 text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+      >
+        Settings &amp; delete account
+      </button>
 
       <NavigationArrows
         onBack={handleBack}

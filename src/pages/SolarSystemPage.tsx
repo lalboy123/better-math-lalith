@@ -264,6 +264,14 @@ const SolarSystemPage: React.FC = () => {
         </div>
       </div>
 
+      <button
+        type="button"
+        onClick={() => navigate('/settings')}
+        className="mb-4 text-sm text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
+      >
+        Settings &amp; delete account
+      </button>
+
       <NavigationArrows
         onBack={handleBack}
         onNext={handleSignOut}

@@ -120,6 +120,14 @@ const TeacherDashboard: React.FC = () => {
             <Button
               type="button"
               variant="outline"
+              onClick={() => navigate('/settings')}
+              className="inline-flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted shadow-sm min-h-[48px]"
+            >
+              Settings
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleSignOut}
               className="inline-flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted shadow-sm min-h-[48px]"
             >

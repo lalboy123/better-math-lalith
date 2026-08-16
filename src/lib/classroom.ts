@@ -1,4 +1,13 @@
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, type Unsubscribe } from 'firebase/firestore';
+import {
+  deleteDoc,
+  deleteField,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  type Unsubscribe,
+} from 'firebase/firestore';
 import { db } from './firebase';
 import {
   getClassroomUnlockPlanet,
@@ -263,6 +272,29 @@ export const setClassDefaultStart = async (classCode: string, planet: string) =>
   });
   // Advance roster records so teachers see the correct current planet live.
   await syncStudentsToClassStart(resolved, normalized);
+};
+
+/** Remove one student nickname and progress from a class roster. */
+export const deleteStudentProfile = async (
+  classCode: string,
+  nickname: string
+): Promise<boolean> => {
+  const resolved = await resolveClassCode(classCode);
+  if (!resolved) return false;
+  const cls = await getClassById(resolved);
+  const key = findStudentKey(cls?.students, nickname) ?? nicknameKey(nickname);
+  await updateDoc(doc(db, 'classrooms', resolved), {
+    [`students.${key}`]: deleteField(),
+  });
+  return true;
+};
+
+/** Permanently delete a teacher class and every student record in it. */
+export const deleteClassroom = async (classCode: string): Promise<boolean> => {
+  const resolved = await resolveClassCode(classCode);
+  if (!resolved) return false;
+  await deleteDoc(doc(db, 'classrooms', resolved));
+  return true;
 };
 
 export const subscribeToClass = (
