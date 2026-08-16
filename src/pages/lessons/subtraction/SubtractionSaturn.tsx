@@ -1,5 +1,5 @@
 // Subtraction Lesson - Saturn (Activity/Practice)
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/context/GameContext';
 import { useLessonStep } from '@/hooks/useLessonStep';
@@ -40,18 +40,20 @@ const SubtractionSaturn: React.FC = () => {
 
   const startAnimation = () => {
     setAnimationPhase('initial');
-    setDisplayCount(5);
     setHidePencils(false);
-    
+    // Drop to 0 first so the counter actually announces "5" on the first play too.
+    setDisplayCount(0);
+    window.setTimeout(() => setDisplayCount(5), 50);
+
     setTimeout(() => {
       setAnimationPhase('animating');
       setHidePencils(true);
     }, 1000);
-    
+
     setTimeout(() => {
       setDisplayCount(3);
     }, 2000);
-    
+
     setTimeout(() => {
       setAnimationPhase('final');
     }, 3000);
@@ -84,6 +86,17 @@ const SubtractionSaturn: React.FC = () => {
     setActivity2Checked(false);
     setShowGuided(false);
   };
+
+  const resetPractice = () => {
+    setLeftPencils(6);
+    setRemovedPencils(0);
+  };
+
+  useEffect(() => {
+    if (step === 1) resetPractice();
+    if (step === 2) resetActivity2();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   const goToNextPlanet = () => {
     completePlanet('saturn');
@@ -179,9 +192,9 @@ const SubtractionSaturn: React.FC = () => {
               Tap pencils to take them away
             </p>
             
-            <div className="bg-card rounded-xl p-10 border border-border mb-8">
-              <div className="flex items-center justify-center gap-12">
-                <div className="flex gap-2 min-w-[180px] justify-center flex-wrap">
+            <div className="bg-card rounded-xl p-6 sm:p-10 border border-border mb-8 w-full max-w-lg">
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex flex-wrap justify-center gap-2 min-w-[8rem] max-w-[12rem] sm:max-w-none">
                   {Array.from({ length: leftPencils }).map((_, i) => (
                     <Pencil key={i} onClick={removePencil} />
                   ))}
@@ -227,9 +240,9 @@ const SubtractionSaturn: React.FC = () => {
               <Counter count={activity2Target} label="You need" />
             </div>
             
-            <div className="bg-card rounded-xl p-10 border border-border mb-8">
-              <div className="flex items-center justify-center gap-12">
-                <div className="flex gap-2 min-w-[180px] justify-center flex-wrap">
+            <div className="bg-card rounded-xl p-6 sm:p-10 border border-border mb-8 w-full max-w-lg">
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex flex-wrap justify-center gap-2 min-w-[8rem] max-w-[12rem] sm:max-w-none">
                   {Array.from({ length: activity2Pencils }).map((_, i) => (
                     <Pencil 
                       key={i} 

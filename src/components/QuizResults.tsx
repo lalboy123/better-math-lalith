@@ -11,6 +11,8 @@ interface QuizResultsProps {
   onFinish: () => void;
   finishLabel?: string;
   onBack?: () => void;
+  /** Attempts per question (1 = first try). Extra tries are shown to teachers. */
+  questionTries?: number[];
 }
 
 const QuizResults: React.FC<QuizResultsProps> = ({
@@ -21,10 +23,13 @@ const QuizResults: React.FC<QuizResultsProps> = ({
   onFinish,
   finishLabel = 'Continue',
   onBack,
+  questionTries,
 }) => {
   const [showResults, setShowResults] = useState(false);
 
   const percentage = Math.round((score / totalQuestions) * 100);
+  const extraTryCount = (questionTries ?? []).filter((t) => t > 1).length;
+  const perfectFirstTry = percentage === 100 && extraTryCount === 0;
 
   const getPerformanceMessage = () => {
     if (percentage >= 90) return "Outstanding! You're a star!";
@@ -114,7 +119,24 @@ const QuizResults: React.FC<QuizResultsProps> = ({
               </div>
             </div>
 
-            {areasToImprove.length > 0 && (
+            {perfectFirstTry && (
+              <div className="mb-6 bg-success/10 rounded-xl p-4">
+                <p className="text-success font-medium">Perfect score! No areas need improvement.</p>
+              </div>
+            )}
+
+            {percentage === 100 && extraTryCount > 0 && (
+              <div className="mb-6 bg-accent/10 rounded-xl p-4">
+                <p className="text-foreground font-medium">
+                  You got every question! Some took more than one try.
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your teacher can see which questions needed extra practice.
+                </p>
+              </div>
+            )}
+
+            {percentage < 100 && areasToImprove.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <AlertCircle className="w-5 h-5 text-accent" />
@@ -133,9 +155,15 @@ const QuizResults: React.FC<QuizResultsProps> = ({
               </div>
             )}
 
-            {areasToImprove.length === 0 && (
-              <div className="mb-6 bg-success/10 rounded-xl p-4">
-                <p className="text-success font-medium">Perfect score! No areas need improvement.</p>
+            {percentage < 100 && areasToImprove.length === 0 && extraTryCount > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertCircle className="w-5 h-5 text-accent" />
+                  <h4 className="font-medium text-foreground">Areas to Practice</h4>
+                </div>
+                <p className="bg-accent/10 text-accent-foreground px-4 py-2 rounded-lg text-sm">
+                  {getTopicLabel(lessonType)}
+                </p>
               </div>
             )}
 

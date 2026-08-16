@@ -13,6 +13,7 @@ import LessonShell from '@/components/LessonShell';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
 import { speak } from '@/lib/speech';
+import { Volume2 } from 'lucide-react';
 
 const CountingSun: React.FC = () => {
   const navigate = useNavigate();
@@ -124,25 +125,27 @@ const CountingSun: React.FC = () => {
                 return (
                   <div
                     key={num}
-                    className="bg-card rounded-xl p-2 sm:p-4 border border-border flex flex-col items-center gap-1.5 sm:gap-3 animate-concept"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => speak(word)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        speak(word);
+                      }
+                    }}
+                    aria-label={`Hear the number ${num}, ${word}`}
+                    className="bg-card rounded-xl p-2 sm:p-4 border border-border flex flex-col items-center gap-1.5 sm:gap-3 animate-concept transition-transform duration-200 hover:scale-[1.03] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer touch-manipulation"
                     style={{ animationDelay: `${(num - 1) * 0.15}s` }}
                   >
-                    <button
-                      type="button"
-                      onClick={() => speak(word)}
-                      aria-label={`Hear the number ${num}`}
-                      className="text-2xl sm:text-4xl font-bold text-primary rounded-lg px-2 sm:px-3 leading-none transition-transform duration-200 hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary cursor-pointer touch-manipulation"
-                    >
-                      {num}
-                    </button>
-                    <div className="flex flex-wrap justify-center gap-1 max-w-[80px]">
+                    <span className="text-2xl sm:text-4xl font-bold text-primary leading-none">{num}</span>
+                    <div className="flex flex-wrap justify-center gap-1 max-w-[80px] pointer-events-none">
                       {Array.from({ length: num }).map((_, i) => (
                         <Apple key={i} size="sm" className="pointer-events-none" />
                       ))}
                     </div>
-                    <span className="text-sm text-muted-foreground">
-                      {word}
-                    </span>
+                    <span className="text-sm text-muted-foreground">{word}</span>
+                    <Volume2 className="w-4 h-4 text-primary/70" aria-hidden />
                   </div>
                 );
               })}

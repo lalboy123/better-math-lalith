@@ -18,7 +18,7 @@ const COPY: Record<LessonType, { title: string; message: string; tip: string }> 
   addition: {
     title: 'Addition Ace!',
     message: 'You put groups together to find the total.',
-    tip: 'Tip: Count on from the bigger number.',
+    tip: 'Tip: Start with the bigger number, then count up the smaller one. (Example: 2 + 5 → say 5, then 6, 7.)',
   },
   subtraction: {
     title: 'Subtraction Hero!',

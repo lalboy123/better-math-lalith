@@ -9,6 +9,7 @@ import {
   getLessonForPlanet,
   getTeacherVisiblePlanet,
   PLANET_META,
+  type PlanetId,
 } from '@/lib/planets';
 import { Button } from '@/components/ui/button';
 
@@ -194,6 +195,21 @@ const TeacherDashboard: React.FC = () => {
                     <div className="text-sm font-medium text-sky-300 mt-1">
                       {planetName} — {lesson}
                     </div>
+                    {s.lastQuiz && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        Last quiz ({PLANET_META[s.lastQuiz.planet as PlanetId]?.name ?? s.lastQuiz.planet}):{' '}
+                        {s.lastQuiz.score}/{s.lastQuiz.total}
+                        {s.lastQuiz.tries.some((t) => t > 1) && (
+                          <p className="mt-1">
+                            Extra tries:{' '}
+                            {s.lastQuiz.tries
+                              .map((t, i) => (t > 1 ? `Q${i + 1} (${t})` : null))
+                              .filter(Boolean)
+                              .join(', ')}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

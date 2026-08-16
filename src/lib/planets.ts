@@ -103,9 +103,14 @@ export const getFurthestProgressPlanet = (
   return PLANET_ORDER[maxIndex];
 };
 
-/** Planet with the highest saved in-lesson step, if any. */
+/**
+ * Planet the student should continue on.
+ * Prefers the current planet (even at step 0) so the hub updates as soon as
+ * they open a new world, not only after they advance a lesson step.
+ */
 export const getInProgressPlanet = (
-  planetSteps: Record<string, number> | undefined
+  planetSteps: Record<string, number> | undefined,
+  currentPlanet?: string | null
 ): PlanetId | null => {
   let best: PlanetId | null = null;
   let bestIndex = -1;
@@ -117,6 +122,12 @@ export const getInProgressPlanet = (
         best = planet as PlanetId;
       }
     }
+  }
+  const current = normalizePlanetId(currentPlanet);
+  if (current && getPlanetIndex(current) >= bestIndex) {
+    // Don't prompt "continue on the Sun" for a brand-new student at step 0.
+    if (best === null && getPlanetIndex(current) === 0) return null;
+    return current;
   }
   return best;
 };

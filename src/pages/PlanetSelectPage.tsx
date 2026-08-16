@@ -109,7 +109,7 @@ const PlanetSelectPage: React.FC = () => {
   };
 
   const maxPlanetName = PLANET_META[classMax as PlanetId]?.name ?? 'Sun';
-  const continuePlanet = getInProgressPlanet(planetSteps);
+  const continuePlanet = getInProgressPlanet(planetSteps, progressPlanetId);
 
   return (
     <div className="min-h-screen bg-background subtle-stars flex flex-col items-center justify-center p-8">

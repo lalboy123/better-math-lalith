@@ -20,7 +20,7 @@ import {
 
 const CountingVenus: React.FC = () => {
   const navigate = useNavigate();
-  const { setShowRocketTransition, completePlanet } = useGame();
+  const { setShowRocketTransition, completePlanet, saveLastQuiz } = useGame();
   const [step, setStep] = useLessonStep('venus');
   const [showTransition, setShowTransition] = useState(false);
   const nextPlanet = getNextPlanet('venus');
@@ -43,6 +43,7 @@ const CountingVenus: React.FC = () => {
   // Quiz results state
   const [quizScore, setQuizScore] = useState(0);
   const [quizAreas, setQuizAreas] = useState<string[]>([]);
+  const [quizTries, setQuizTries] = useState<number[]>([]);
 
   const totalSteps = 3;
 
@@ -61,9 +62,17 @@ const CountingVenus: React.FC = () => {
     setShowGuided(false);
   };
   
-  const handleQuizComplete = (score: number, areas: string[]) => {
+  const handleQuizComplete = (score: number, areas: string[], tries: number[]) => {
     setQuizScore(score);
     setQuizAreas(areas);
+    setQuizTries(tries);
+    void saveLastQuiz({
+      planet: 'venus',
+      lesson: 'counting',
+      score,
+      total: 8,
+      tries,
+    });
     setStep(2);
   };
 
@@ -196,6 +205,7 @@ const CountingVenus: React.FC = () => {
             score={quizScore}
             totalQuestions={8}
             areasToImprove={quizAreas}
+            questionTries={quizTries}
             lessonType="counting"
             onFinish={() => setShowTransition(true)}
             onBack={() => {

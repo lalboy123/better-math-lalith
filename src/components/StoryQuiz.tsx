@@ -26,11 +26,13 @@ interface Question {
   icon?: LucideIcon;
   /** Whether the icon should be filled (looks nicer for stars/buttons). */
   iconFill?: boolean;
+  /** Extra classes for the counting picture (e.g. blue buttons). */
+  iconClass?: string;
 }
 
 interface StoryQuizProps {
   lessonType: 'counting' | 'addition' | 'subtraction';
-  onComplete: (score: number, areas: string[]) => void;
+  onComplete: (score: number, areas: string[], questionTries: number[]) => void;
 }
 
 const countingQuestions: Question[] = [
@@ -61,12 +63,13 @@ const countingQuestions: Question[] = [
   },
   {
     story: 'Luna sees buttons on the control panel.',
-    question: 'How many red buttons does she see?',
+    question: 'How many blue buttons does she see?',
     options: [5, 6, 7, 4],
     answer: 6,
     num1: 6,
     icon: Circle,
     iconFill: true,
+    iconClass: 'bg-sky-500/30 text-sky-400',
   },
   {
     story: 'She checks the power meters.',
@@ -296,6 +299,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
   const [showAffirmation, setShowAffirmation] = useState(false);
   const [currentAffirmation, setCurrentAffirmation] = useState('');
   const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [questionTries, setQuestionTries] = useState<number[]>(() => Array(8).fill(0));
   const [showGuidedPractice, setShowGuidedPractice] = useState(false);
   const [showRocketLaunch, setShowRocketLaunch] = useState(false);
 
@@ -357,6 +361,9 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     setEquationCorrect(correct);
     if (!correct) {
       setEquationAttempts((prev) => prev + 1);
+      if (!wrongTopics.includes(lessonType)) {
+        setWrongTopics((prev) => [...prev, lessonType]);
+      }
     }
   };
 
@@ -409,8 +416,13 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     setIsChecked(false);
   };
 
+  const triesForCurrent = () => 1 + wrongAttempts + equationAttempts;
+
   const nextQuestion = () => {
     setShowAffirmation(false);
+    const triesThis = triesForCurrent();
+    const allTries = questionTries.map((t, i) => (i === currentQuestion ? triesThis : t));
+    setQuestionTries(allTries);
     setWrongAttempts(0);
 
     if (currentQuestion < questions.length - 1) {
@@ -429,10 +441,11 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
         finalStars[currentQuestion] = true;
       }
       const score = finalStars.filter(Boolean).length;
+      const areas = allTries.some((t) => t > 1) ? [lessonType] : [...wrongTopics];
       setShowRocketLaunch(true);
       if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
       finishTimerRef.current = setTimeout(() => {
-        onComplete(score, wrongTopics);
+        onComplete(score, areas, allTries);
       }, 3000);
     }
   };
@@ -464,7 +477,9 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
       {Array.from({ length: question.num1 }).map((_, i) => (
         <span
           key={i}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary/25 text-primary"
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-full ${
+            question.iconClass ?? 'bg-primary/25 text-primary'
+          }`}
         >
           <CountIcon className={`h-4 w-4 ${question.iconFill ? 'fill-current' : ''}`} />
         </span>
@@ -613,6 +628,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
               value={typedAnswer}
               onChange={setTypedAnswer}
               disabled={isChecked}
+              maxLength={1}
             />
             {isChecked && (
               <p className={`text-center mt-4 text-xl font-semibold ${isCorrect ? 'text-success' : 'text-destructive'}`}>
@@ -742,7 +758,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
             <p className="text-lg text-foreground leading-relaxed flex-1">
               {question.story}
             </p>
-            <ReadAloudButton text={`${question.story} ${question.question}`} className="shrink-0" />
+            <ReadAloudButton text={question.story} className="shrink-0" />
           </div>
         </div>
 

@@ -240,7 +240,18 @@ const SubtractionUranus: React.FC = () => {
       planet="uranus"
       totalSteps={totalSteps}
       step={step}
-      onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
+      onBack={
+        step > 0
+          ? () => {
+              if (wordPhase === 'solve') {
+                resetWord();
+                setWordPhase('equation');
+                return;
+              }
+              setStep(step - 1);
+            }
+          : () => navigate('/planets')
+      }
       onNext={step < totalSteps - 1 ? () => setStep(step + 1) : undefined}
       showNext={step < totalSteps - 1}
     >

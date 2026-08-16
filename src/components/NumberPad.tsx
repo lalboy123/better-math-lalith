@@ -14,7 +14,7 @@ const NumberPad: React.FC<NumberPadProps> = ({
   value,
   onChange,
   disabled = false,
-  maxLength = 2,
+  maxLength = 1,
 }) => {
   const pressDigit = (digit: string) => {
     if (disabled || value.length >= maxLength) return;

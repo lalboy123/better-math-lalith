@@ -15,6 +15,7 @@ import {
   SOLAR_ORBIT,
   getTopicDisplayName,
   getClassroomUnlockPlanet,
+  getInProgressPlanet,
 } from '@/lib/planets';
 
 const BASE_SIZE = 640; // design space that fits Neptune orbit (580) + labels
@@ -28,6 +29,7 @@ const SolarSystemPage: React.FC = () => {
     classMaxPlanetId,
     setPosition,
     getPlanetStep,
+    planetSteps,
     hydrateFromStudent,
     hydrateClassMax,
   } = useGame();
@@ -82,6 +84,7 @@ const SolarSystemPage: React.FC = () => {
   const classMax =
     getClassroomUnlockPlanet(classroom) ?? classMaxPlanetId ?? 'sun';
   const maxPlanetName = PLANET_META[classMax as PlanetId]?.name ?? 'Sun';
+  const continuePlanet = getInProgressPlanet(planetSteps, progressPlanetId);
 
   const maxOrbitRadius = useMemo(() => {
     let max = 0;
@@ -134,6 +137,13 @@ const SolarSystemPage: React.FC = () => {
           Your teacher has unlocked planets through{' '}
           <strong className="text-foreground">{maxPlanetName}</strong>. Tap a planet to start or
           continue its lesson.
+          {continuePlanet && PLANET_META[continuePlanet] && (
+            <>
+              {' '}
+              Tap <strong className="text-foreground">{PLANET_META[continuePlanet].name}</strong> to
+              continue where you left off.
+            </>
+          )}
         </p>
       </div>
 

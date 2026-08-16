@@ -9,7 +9,7 @@ type LessonLocationState = { initialStep?: number; replay?: boolean };
 
 /** Lesson step index persisted to Firebase per planet. */
 export function useLessonStep(planetId: PlanetId) {
-  const { getPlanetStep, savePlanetStep, planetSteps } = useGame();
+  const { getPlanetStep, savePlanetStep, planetSteps, markPlanetVisited } = useGame();
   const location = useLocation();
   const navState = location.state as LessonLocationState | null;
   const navStep = navState?.initialStep;
@@ -58,6 +58,11 @@ export function useLessonStep(planetId: PlanetId) {
       cancelled = true;
     };
   }, [planetId, isReplay]);
+
+  useEffect(() => {
+    if (isReplay) return;
+    void markPlanetVisited(planetId);
+  }, [planetId, isReplay, markPlanetVisited]);
 
   // Persist when leaving the lesson (home, logout, back to planet ring)
   useEffect(() => {

@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 
 const SubtractionNeptune: React.FC = () => {
   const navigate = useNavigate();
-  const { completePlanet } = useGame();
+  const { completePlanet, saveLastQuiz } = useGame();
   const [step, setStep] = useLessonStep('neptune');
   
   // MCQ state
@@ -35,6 +35,7 @@ const SubtractionNeptune: React.FC = () => {
   // Quiz results state
   const [quizScore, setQuizScore] = useState(0);
   const [quizAreas, setQuizAreas] = useState<string[]>([]);
+  const [quizTries, setQuizTries] = useState<number[]>([]);
 
   const totalSteps = 3;
 
@@ -52,9 +53,17 @@ const SubtractionNeptune: React.FC = () => {
     }
   };
   
-  const handleQuizComplete = (score: number, areas: string[]) => {
+  const handleQuizComplete = (score: number, areas: string[], tries: number[]) => {
     setQuizScore(score);
     setQuizAreas(areas);
+    setQuizTries(tries);
+    void saveLastQuiz({
+      planet: 'neptune',
+      lesson: 'subtraction',
+      score,
+      total: 8,
+      tries,
+    });
     setStep(2);
   };
 
@@ -167,6 +176,7 @@ const SubtractionNeptune: React.FC = () => {
             score={quizScore}
             totalQuestions={8}
             areasToImprove={quizAreas}
+            questionTries={quizTries}
             lessonType="subtraction"
             onFinish={() => {
               void completePlanet('neptune');

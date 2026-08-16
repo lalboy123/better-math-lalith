@@ -20,7 +20,7 @@ import {
 
 const AdditionJupiter: React.FC = () => {
   const navigate = useNavigate();
-  const { setShowRocketTransition, completePlanet } = useGame();
+  const { setShowRocketTransition, completePlanet, saveLastQuiz } = useGame();
   const [step, setStep] = useLessonStep('jupiter');
   const [showTransition, setShowTransition] = useState(false);
   const nextPlanet = getNextPlanet('jupiter');
@@ -45,6 +45,7 @@ const AdditionJupiter: React.FC = () => {
   // Quiz results state
   const [quizScore, setQuizScore] = useState(0);
   const [quizAreas, setQuizAreas] = useState<string[]>([]);
+  const [quizTries, setQuizTries] = useState<number[]>([]);
 
   const totalSteps = 3;
 
@@ -62,9 +63,17 @@ const AdditionJupiter: React.FC = () => {
     }
   };
   
-  const handleQuizComplete = (score: number, areas: string[]) => {
+  const handleQuizComplete = (score: number, areas: string[], tries: number[]) => {
     setQuizScore(score);
     setQuizAreas(areas);
+    setQuizTries(tries);
+    void saveLastQuiz({
+      planet: 'jupiter',
+      lesson: 'addition',
+      score,
+      total: 8,
+      tries,
+    });
     setStep(2);
   };
 
@@ -200,6 +209,7 @@ const AdditionJupiter: React.FC = () => {
             score={quizScore}
             totalQuestions={8}
             areasToImprove={quizAreas}
+            questionTries={quizTries}
             lessonType="addition"
             onFinish={() => setShowTransition(true)}
             onBack={() => {

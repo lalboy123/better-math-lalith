@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Apple from './Apple';
 import Pencil from './Pencil';
 import ReadAloudButton from './ReadAloudButton';
@@ -34,6 +34,18 @@ const subtractionStepNarration = (step: number) => {
   if (step >= 3) parts.push('4 minus 1 equals 3. The minus sign means subtract.');
   if (step >= 4) parts.push('The answer is called the difference.');
   return parts.join(' ') || 'Subtraction means taking things away.';
+};
+
+const HearLessonPrompt: React.FC<{ text: string }> = ({ text }) => {
+  const [heard, setHeard] = useState(false);
+  return (
+    <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
+      <ReadAloudButton text={text} autoPlay onPlayed={() => setHeard(true)} />
+      <span className="text-xs sm:text-sm text-muted-foreground">
+        {heard ? 'Tap to hear this again' : 'Tap to hear this'}
+      </span>
+    </div>
+  );
 };
 
 const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
@@ -125,12 +137,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
             </div>
           </div>
         )}
-        {step >= 7 && (
-          <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
-            <ReadAloudButton text={countingStepNarration(6)} />
-            <span className="text-xs sm:text-sm text-muted-foreground">Tap to hear this again</span>
-          </div>
-        )}
+        {step >= 7 && <HearLessonPrompt text={countingStepNarration(6)} />}
       </div>
     );
   }
@@ -197,12 +204,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
             </p>
           </div>
         )}
-        {step >= 6 && (
-          <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
-            <ReadAloudButton text={additionStepNarration(5)} />
-            <span className="text-xs sm:text-sm text-muted-foreground">Tap to hear this again</span>
-          </div>
-        )}
+        {step >= 6 && <HearLessonPrompt text={additionStepNarration(5)} />}
       </div>
     );
   }
@@ -276,12 +278,7 @@ const ConceptVisual: React.FC<ConceptVisualProps> = ({ type, step }) => {
             </p>
           </div>
         )}
-        {step >= 6 && (
-          <div className="flex flex-col items-center gap-1 animate-fade-in pt-2">
-            <ReadAloudButton text={subtractionStepNarration(5)} />
-            <span className="text-xs sm:text-sm text-muted-foreground">Tap to hear this again</span>
-          </div>
-        )}
+        {step >= 6 && <HearLessonPrompt text={subtractionStepNarration(5)} />}
       </div>
     );
   }

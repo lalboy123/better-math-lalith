@@ -1,5 +1,5 @@
 // Addition Lesson - Earth (Activity/Practice with pencils)
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '@/context/GameContext';
 import { useLessonStep } from '@/hooks/useLessonStep';
@@ -41,18 +41,20 @@ const AdditionEarth: React.FC = () => {
 
   const startAnimation = () => {
     setAnimationPhase('initial');
-    setDisplayCount(3);
     setShowNewPencils(false);
-    
+    // Drop to 0 first so the counter actually announces "3" on the first play too.
+    setDisplayCount(0);
+    window.setTimeout(() => setDisplayCount(3), 50);
+
     setTimeout(() => {
       setAnimationPhase('animating');
       setShowNewPencils(true);
     }, 1000);
-    
+
     setTimeout(() => {
       setDisplayCount(5);
     }, 2000);
-    
+
     setTimeout(() => {
       setAnimationPhase('final');
     }, 3000);
@@ -86,6 +88,18 @@ const AdditionEarth: React.FC = () => {
     setShowGuided(false);
   };
 
+  const resetPractice = () => {
+    setRightPencils(0);
+    setAvailablePencils(5);
+  };
+
+  useEffect(() => {
+    if (step === 1) resetPractice();
+    if (step === 2) resetActivity2();
+    // Reset practice/target activities whenever the student returns to them.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
   const goToNextPlanet = () => {
     completePlanet('earth');
     setShowRocketTransition(true);
@@ -118,7 +132,7 @@ const AdditionEarth: React.FC = () => {
             </h2>
             
             <div className="bg-card rounded-xl p-10 border border-border mb-8 w-full max-w-md">
-              <div className="flex justify-center items-end gap-3 mb-6 min-h-[120px]">
+              <div className="flex justify-center items-end gap-2 sm:gap-3 mb-6 min-h-[120px] flex-wrap max-w-[16rem] sm:max-w-none mx-auto">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <div key={i}>
                     <Pencil className="pointer-events-none" size="lg" />
@@ -174,9 +188,9 @@ const AdditionEarth: React.FC = () => {
               Tap pencils to add them
             </p>
             
-            <div className="bg-card rounded-xl p-10 border border-border mb-8">
-              <div className="flex items-center justify-center gap-12">
-                <div className="flex gap-2">
+            <div className="bg-card rounded-xl p-6 sm:p-10 border border-border mb-8 w-full max-w-lg">
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex flex-wrap justify-center gap-2 max-w-[10rem] sm:max-w-none">
                   {Array.from({ length: leftPencils }).map((_, i) => (
                     <Pencil key={i} className="pointer-events-none" />
                   ))}
@@ -184,7 +198,7 @@ const AdditionEarth: React.FC = () => {
                 
                 <span className="text-5xl font-bold text-earth">+</span>
                 
-                <div className="flex gap-2 min-w-[120px] justify-center">
+                <div className="flex flex-wrap justify-center gap-2 min-w-[4rem] max-w-[10rem] sm:max-w-none">
                   {Array.from({ length: rightPencils }).map((_, i) => (
                     <div key={i} className="animate-pencil-appear">
                       <Pencil className="pointer-events-none" />
@@ -224,9 +238,9 @@ const AdditionEarth: React.FC = () => {
               <Counter count={activity2Target} label="You need" />
             </div>
             
-            <div className="bg-card rounded-xl p-10 border border-border mb-8">
-              <div className="flex items-center justify-center gap-12">
-                <div className="flex gap-2">
+            <div className="bg-card rounded-xl p-6 sm:p-10 border border-border mb-8 w-full max-w-lg">
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex flex-wrap justify-center gap-2 max-w-[10rem] sm:max-w-none">
                   {Array.from({ length: activity2Left }).map((_, i) => (
                     <Pencil key={i} className="pointer-events-none" />
                   ))}
@@ -234,7 +248,7 @@ const AdditionEarth: React.FC = () => {
                 
                 <span className="text-5xl font-bold text-earth">+</span>
                 
-                <div className="flex gap-2 min-w-[120px] justify-center">
+                <div className="flex flex-wrap justify-center gap-2 min-w-[4rem] max-w-[10rem] sm:max-w-none">
                   {Array.from({ length: activity2Right }).map((_, i) => (
                     <div key={i} className="animate-pencil-appear">
                       <Pencil className="pointer-events-none" />

@@ -6,15 +6,27 @@ interface ReadAloudButtonProps {
   /** The text to read aloud when tapped. */
   text: string;
   className?: string;
+  /** Speak once when the button appears (label can then say "again"). */
+  autoPlay?: boolean;
+  /** Called the first time speech actually starts (tap or autoplay). */
+  onPlayed?: () => void;
 }
 
 /**
  * Kid-sized speaker button that reads the given text aloud.
  * Stops speech automatically when the text changes or the button unmounts.
  */
-const ReadAloudButton: React.FC<ReadAloudButtonProps> = ({ text, className = '' }) => {
+const ReadAloudButton: React.FC<ReadAloudButtonProps> = ({
+  text,
+  className = '',
+  autoPlay = false,
+  onPlayed,
+}) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const safetyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const playedRef = useRef(false);
+  const onPlayedRef = useRef(onPlayed);
+  onPlayedRef.current = onPlayed;
 
   const clearSafety = () => {
     if (safetyTimer.current) {
@@ -23,11 +35,48 @@ const ReadAloudButton: React.FC<ReadAloudButtonProps> = ({ text, className = '' 
     }
   };
 
+  const markPlayed = () => {
+    if (!playedRef.current) {
+      playedRef.current = true;
+      onPlayedRef.current?.();
+    }
+  };
+
+  const queueSpeech = () => {
+    const queued = speak(text, {
+      onEnd: () => {
+        clearSafety();
+        setIsSpeaking(false);
+      },
+    });
+    if (!queued) {
+      setIsSpeaking(false);
+      return false;
+    }
+    setIsSpeaking(true);
+    markPlayed();
+    clearSafety();
+    safetyTimer.current = setTimeout(() => setIsSpeaking(false), 30000);
+    return true;
+  };
+
   useEffect(() => {
     setIsSpeaking(false);
+    playedRef.current = false;
     clearSafety();
     stopSpeaking();
   }, [text]);
+
+  useEffect(() => {
+    if (!autoPlay || !isSpeechSupported()) return;
+    queueSpeech();
+    return () => {
+      clearSafety();
+      stopSpeaking();
+    };
+    // Auto-play only when this instance first appears with this text.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPlay, text]);
 
   useEffect(
     () => () => {
@@ -46,23 +95,7 @@ const ReadAloudButton: React.FC<ReadAloudButtonProps> = ({ text, className = '' 
       setIsSpeaking(false);
       return;
     }
-
-    const queued = speak(text, {
-      onEnd: () => {
-        clearSafety();
-        setIsSpeaking(false);
-      },
-    });
-
-    if (!queued) {
-      setIsSpeaking(false);
-      return;
-    }
-
-    setIsSpeaking(true);
-    // Safety: never leave the button stuck if onend never fires (some WebViews).
-    clearSafety();
-    safetyTimer.current = setTimeout(() => setIsSpeaking(false), 30000);
+    queueSpeech();
   };
 
   return (

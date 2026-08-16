@@ -170,15 +170,15 @@ const AdditionMars: React.FC = () => {
               <Counter count={wordTarget} label="You need" />
             </div>
             
-            <div className="bg-card rounded-xl p-8 border border-border mb-8">
-              <div className="flex items-center justify-center gap-10">
-                <div className="flex gap-2">
+            <div className="bg-card rounded-xl p-6 sm:p-8 border border-border mb-8 w-full max-w-lg">
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex flex-wrap justify-center gap-2 max-w-[10rem] sm:max-w-none">
                   {Array.from({ length: wordLeft }).map((_, i) => (
                     <Pencil key={i} className="pointer-events-none" />
                   ))}
                 </div>
                 <span className="text-4xl font-bold text-mars">+</span>
-                <div className="flex gap-2 min-w-[100px] justify-center">
+                <div className="flex flex-wrap justify-center gap-2 min-w-[4rem] max-w-[10rem] sm:max-w-none">
                   {Array.from({ length: wordRight }).map((_, i) => (
                     <div key={i} className="animate-pencil-appear">
                       <Pencil className="pointer-events-none" />
@@ -255,7 +255,18 @@ const AdditionMars: React.FC = () => {
       planet="mars"
       totalSteps={totalSteps}
       step={step}
-      onBack={step > 0 ? () => setStep(step - 1) : () => navigate('/planets')}
+      onBack={
+        step > 0
+          ? () => {
+              if (wordPhase === 'solve') {
+                resetWord();
+                setWordPhase('equation');
+                return;
+              }
+              setStep(step - 1);
+            }
+          : () => navigate('/planets')
+      }
       onNext={step < totalSteps - 1 ? () => setStep(step + 1) : undefined}
       showNext={step < totalSteps - 1}
     >

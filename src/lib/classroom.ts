@@ -12,12 +12,22 @@ import {
 
 export type LessonType = 'counting' | 'addition' | 'subtraction';
 
+export interface LastQuizSummary {
+  planet: string;
+  lesson: LessonType;
+  score: number;
+  total: number;
+  /** How many attempts each question took (1 = first try). */
+  tries: number[];
+}
+
 export interface StudentState {
   nickname: string;
   planet: string;
   lesson: LessonType;
   completedPlanets?: string[];
   planetSteps?: Record<string, number>;
+  lastQuiz?: LastQuizSummary;
   lastUpdated: number;
 }
 

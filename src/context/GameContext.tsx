@@ -6,6 +6,7 @@ import {
   applyClassStartIfNeeded,
   LessonType,
   StudentState,
+  LastQuizSummary,
 } from '@/lib/classroom';
 import {
   getActiveStudent,
@@ -37,6 +38,8 @@ interface GameContextType {
   completePlanet: (planetId: PlanetId) => Promise<void>;
   getOrderedSequence: () => { planet: PlanetId; lesson: LessonType }[];
   setPosition: (planet: PlanetId, lesson: LessonType) => void;
+  markPlanetVisited: (planetId: PlanetId) => Promise<void>;
+  saveLastQuiz: (summary: LastQuizSummary) => Promise<void>;
   hydrateFromStudent: (student: StudentState) => void;
   hydrateClassMax: (classMaxPlanetId?: string) => void;
 }
@@ -120,6 +123,60 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         {
           ...existing,
           planetSteps: { ...(existing.planetSteps ?? {}), [planetId]: step },
+          lastUpdated: Date.now(),
+        },
+        active.nickname
+      );
+    },
+    [activeSession]
+  );
+
+  const markPlanetVisited = useCallback(
+    async (planetId: PlanetId) => {
+      setProgressPlanetId((prev) =>
+        getPlanetIndex(planetId) >= getPlanetIndex(prev) ? planetId : prev
+      );
+      setCurrentLesson(getLessonForPlanet(planetId));
+
+      const active = activeSession ?? getActiveStudent();
+      if (!active) return;
+
+      const clsSnap = await getClass(active.classCode);
+      const existing = clsSnap?.students?.[active.nickname];
+      if (!existing) return;
+
+      const current = getFurthestProgressPlanet(existing);
+      const nextPlanet =
+        getPlanetIndex(planetId) >= getPlanetIndex(current) ? planetId : current;
+
+      await updateStudentState(
+        active.classCode,
+        {
+          ...existing,
+          planet: nextPlanet,
+          lesson: getLessonForPlanet(nextPlanet),
+          lastUpdated: Date.now(),
+        },
+        active.nickname
+      );
+    },
+    [activeSession]
+  );
+
+  const saveLastQuiz = useCallback(
+    async (summary: LastQuizSummary) => {
+      const active = activeSession ?? getActiveStudent();
+      if (!active) return;
+
+      const clsSnap = await getClass(active.classCode);
+      const existing = clsSnap?.students?.[active.nickname];
+      if (!existing) return;
+
+      await updateStudentState(
+        active.classCode,
+        {
+          ...existing,
+          lastQuiz: summary,
           lastUpdated: Date.now(),
         },
         active.nickname
@@ -228,6 +285,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         completePlanet,
         getOrderedSequence,
         setPosition,
+        markPlanetVisited,
+        saveLastQuiz,
         hydrateFromStudent,
         hydrateClassMax,
       }}

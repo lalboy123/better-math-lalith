@@ -61,10 +61,12 @@ export const speak = (text: string, options?: SpeakOptions): boolean => {
     clearTimeout(speakTimer);
     speakTimer = null;
   }
+
+  // Check before cancel so a fresh tap can speak inside the iOS user-gesture window.
+  const wasSpeaking = speechSynthesis.speaking || speechSynthesis.pending;
   speechSynthesis.cancel();
 
-  // iOS WKWebView often needs a tick after cancel before speak works.
-  speakTimer = setTimeout(() => {
+  const start = () => {
     speakTimer = null;
     const utterance = new SpeechSynthesisUtterance(cleaned);
     utterance.rate = 0.85;
@@ -76,7 +78,14 @@ export const speak = (text: string, options?: SpeakOptions): boolean => {
     utterance.onend = finish;
     utterance.onerror = finish;
     speechSynthesis.speak(utterance);
-  }, 40);
+  };
+
+  // iOS WKWebView often needs a tick after cancel before a new utterance works.
+  if (wasSpeaking) {
+    speakTimer = setTimeout(start, 40);
+  } else {
+    start();
+  }
 
   return true;
 };
