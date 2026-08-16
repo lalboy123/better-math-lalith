@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
+import AuthNavButton from '@/components/AuthNavButton';
 import { Classroom, setClassDefaultStart, subscribeToClass } from '@/lib/classroom';
 import { clearActiveTeacher, getActiveTeacher, setActiveTeacher } from '@/lib/session';
 import {
@@ -68,6 +69,10 @@ const TeacherDashboard: React.FC = () => {
   const teacherPin = cls?.teacherCode || getActiveTeacher()?.teacherCode;
   const classUnlock = getClassroomUnlockPlanet(cls) ?? defaultPlanet;
 
+  const handleBack = () => {
+    navigate('/');
+  };
+
   const handleSignOut = () => {
     clearActiveTeacher();
     navigate('/', { replace: true });
@@ -109,15 +114,18 @@ const TeacherDashboard: React.FC = () => {
               </p>
             )}
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleSignOut}
-            className="inline-flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted shadow-sm min-h-[48px]"
-          >
-            <LogOut className="h-5 w-5 shrink-0 text-foreground" strokeWidth={2.25} aria-hidden />
-            <span>Sign Out</span>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <AuthNavButton onClick={handleBack} />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleSignOut}
+              className="inline-flex items-center gap-2 border-border bg-card text-foreground hover:bg-muted shadow-sm min-h-[48px]"
+            >
+              <LogOut className="h-5 w-5 shrink-0 text-foreground" strokeWidth={2.25} aria-hidden />
+              <span>Sign Out</span>
+            </Button>
+          </div>
         </div>
 
         {loadError && (

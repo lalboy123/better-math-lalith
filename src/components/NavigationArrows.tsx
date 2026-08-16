@@ -9,6 +9,8 @@ interface NavigationArrowsProps {
   showNext?: boolean;
   nextLabel?: string;
   backLabel?: string;
+  /** Override the default chevron on the next/right button. */
+  nextIcon?: React.ReactNode;
   /** Sit in the lesson footer instead of a full-width overlay that steals taps. */
   embedded?: boolean;
 }
@@ -23,6 +25,7 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
   showNext = true,
   nextLabel,
   backLabel,
+  nextIcon,
   embedded = false,
 }) => {
   return (
@@ -53,8 +56,17 @@ const NavigationArrows: React.FC<NavigationArrowsProps> = ({
 
       {showNext && onNext ? (
         <Button type="button" onClick={onNext} variant="outline" className={navBtnClass}>
-          <span>{nextLabel ?? 'Next'}</span>
-          <ChevronRight className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />
+          {nextIcon ? (
+            <>
+              {nextIcon}
+              <span>{nextLabel ?? 'Next'}</span>
+            </>
+          ) : (
+            <>
+              <span>{nextLabel ?? 'Next'}</span>
+              <ChevronRight className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />
+            </>
+          )}
         </Button>
       ) : (
         <div />

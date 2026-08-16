@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useGame } from '@/context/GameContext';
 import CircleDiagram from '@/components/CircleDiagram';
@@ -54,6 +55,10 @@ const PlanetSelectPage: React.FC = () => {
     });
     return () => unsub();
   }, [navigate, hydrateFromStudent, hydrateClassMax]);
+
+  const handleBack = () => {
+    navigate('/');
+  };
 
   const handleSignOut = () => {
     clearActiveStudent();
@@ -145,7 +150,12 @@ const PlanetSelectPage: React.FC = () => {
           : 'Replay earlier planets or jump ahead to any planet your teacher has unlocked.'}
       </p>
 
-      <NavigationArrows onBack={handleSignOut} showNext={false} backLabel="Sign Out" />
+      <NavigationArrows
+        onBack={handleBack}
+        onNext={handleSignOut}
+        nextLabel="Sign Out"
+        nextIcon={<LogOut className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />}
+      />
     </div>
   );
 };

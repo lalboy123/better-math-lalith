@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Rocket } from 'lucide-react';
+import { Lock, LogOut, Rocket } from 'lucide-react';
 import { useGame } from '@/context/GameContext';
 import NavigationArrows from '@/components/NavigationArrows';
 import { subscribeToClass, Classroom } from '@/lib/classroom';
@@ -69,6 +69,10 @@ const SolarSystemPage: React.FC = () => {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  const handleBack = () => {
+    navigate('/');
+  };
 
   const handleSignOut = () => {
     clearActiveStudent();
@@ -250,7 +254,12 @@ const SolarSystemPage: React.FC = () => {
         </div>
       </div>
 
-      <NavigationArrows onBack={handleSignOut} showNext={false} backLabel="Sign Out" />
+      <NavigationArrows
+        onBack={handleBack}
+        onNext={handleSignOut}
+        nextLabel="Sign Out"
+        nextIcon={<LogOut className="h-6 w-6 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden />}
+      />
     </div>
   );
 };
