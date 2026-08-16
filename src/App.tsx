@@ -1,9 +1,9 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { GameProvider } from "./context/GameContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import RequireStudentSession from "./components/RequireStudentSession";
@@ -28,12 +28,29 @@ import NotFound from "./pages/NotFound";
 import CookiePolicyPage from "./pages/CookiePolicyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import SupportPage from "./pages/SupportPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
 const lesson = (element: ReactNode) => (
   <RequireStudentSession>{element}</RequireStudentSession>
 );
+
+/** Native iOS tab bar posts this event to move around the site without a full reload. */
+const NativeNavigationBridge = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const onNavigate = (event: Event) => {
+      const path = (event as CustomEvent<{ path?: string }>).detail?.path;
+      if (typeof path === "string" && path.startsWith("/")) {
+        navigate(path);
+      }
+    };
+    window.addEventListener("mathlift-navigate", onNavigate);
+    return () => window.removeEventListener("mathlift-navigate", onNavigate);
+  }, [navigate]);
+  return null;
+};
 
 const App = () => (
   <ErrorBoundary>
@@ -44,11 +61,13 @@ const App = () => (
           <Sonner />
           <RocketTransition />
           <BrowserRouter>
+            <NativeNavigationBridge />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/cookie-policy" element={<CookiePolicyPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/planets" element={<StudentHubPage />} />
               <Route path="/solar-system" element={<Navigate to="/planets" replace />} />
               <Route path="/planet-select" element={<Navigate to="/planets" replace />} />

@@ -27,8 +27,12 @@ const SupportPage: React.FC = () => {
         <section className="mb-8 rounded-2xl border border-border bg-card/90 p-6">
           <h2 className="text-xl font-semibold mb-3">Contact</h2>
           <p className="text-[15px] leading-relaxed text-muted-foreground mb-3">
-            Teachers, students, and parents can email us for help with joining a class, teacher PINs,
-            or account questions.
+            Teachers, students, and parents can email us for help with joining a class or teacher
+            PINs. To delete a student profile or class, use the Delete button on{' '}
+            <Link to="/settings" className="text-primary hover:underline font-medium">
+              Settings
+            </Link>
+            — we do not handle account deletion by email.
           </p>
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
@@ -53,6 +57,10 @@ const SupportPage: React.FC = () => {
               <strong className="text-foreground">Sign out:</strong> on the planet screen, tap Sign
               Out, then Login again if you need to switch devices or students.
             </li>
+            <li>
+              <strong className="text-foreground">Delete account:</strong> open Settings and tap
+              Delete student account or Delete class. That is the only way to remove MathLift data.
+            </li>
           </ul>
         </section>
 
@@ -66,6 +74,10 @@ const SupportPage: React.FC = () => {
             and{' '}
             <Link to="/cookie-policy" className="text-primary hover:underline font-medium">
               Cookie Policy
+            </Link>
+            . Account deletion is only available in{' '}
+            <Link to="/settings" className="text-primary hover:underline font-medium">
+              Settings
             </Link>
             .
           </p>
