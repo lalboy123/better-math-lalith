@@ -37,7 +37,7 @@ Apple will **not** accept a website URL alone. You need a native iOS build:
 ## App Store Connect listing
 
 - Age rating: educational / kids-appropriate (answer COPPA questionnaire honestly)
-- Privacy Nutrition Labels: class code + nickname + Firebase progress; analytics if enabled
+- Privacy Nutrition Labels: class code + nickname + Firebase progress; no Google Analytics / tracking SDKs
 - Support URL: your deployed `/support` page
 - Privacy Policy URL: your deployed `/privacy-policy` page
 - Screenshots: iPhone + iPad of Home, Join, Planets, a lesson, Teacher dashboard

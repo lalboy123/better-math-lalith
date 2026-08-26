@@ -26,6 +26,11 @@ const PrivacyPolicyPage: React.FC = () => {
             code and a nickname (not a full legal name or email). Progress is stored so learners can
             continue on another device with the same class code and nickname.
           </p>
+          <p className="text-[15px] leading-relaxed text-slate-600 mb-3">
+            MathLift does not use Google Analytics, advertising identifiers, or unique device IDs.
+            We do not use cookies or similar technologies for advertising or third-party usage
+            tracking.
+          </p>
           <p className="text-[15px] leading-relaxed text-slate-600">
             Teachers should avoid collecting unnecessary personal information. For privacy questions,
             contact{' '}
