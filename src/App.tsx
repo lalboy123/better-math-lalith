@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { GameProvider } from "./context/GameContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import RequireStudentSession from "./components/RequireStudentSession";
+import NativeShellBridge from "./components/NativeShellBridge";
 import RocketTransition from "./components/RocketTransition";
 import HomePage from "./pages/HomePage";
 import StudentLoginPage from "./pages/StudentLoginPage";
@@ -28,6 +29,7 @@ import NotFound from "./pages/NotFound";
 import CookiePolicyPage from "./pages/CookiePolicyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import SupportPage from "./pages/SupportPage";
+import SettingsPage from "./pages/SettingsPage";
 
 const queryClient = new QueryClient();
 
@@ -44,11 +46,13 @@ const App = () => (
           <Sonner />
           <RocketTransition />
           <BrowserRouter>
+            <NativeShellBridge />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/cookie-policy" element={<CookiePolicyPage />} />
               <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/planets" element={<StudentHubPage />} />
               <Route path="/solar-system" element={<Navigate to="/planets" replace />} />
               <Route path="/planet-select" element={<Navigate to="/planets" replace />} />

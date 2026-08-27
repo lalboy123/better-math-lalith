@@ -1,6 +1,7 @@
 import React from 'react';
 import { Delete } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { hapticTap } from '@/lib/haptics';
 
 interface NumberPadProps {
   value: string;
@@ -18,6 +19,7 @@ const NumberPad: React.FC<NumberPadProps> = ({
 }) => {
   const pressDigit = (digit: string) => {
     if (disabled || value.length >= maxLength) return;
+    hapticTap();
     // Avoid leading zeros like "05"
     if (value === '0') {
       onChange(digit);
@@ -28,6 +30,7 @@ const NumberPad: React.FC<NumberPadProps> = ({
 
   const backspace = () => {
     if (disabled) return;
+    hapticTap();
     onChange(value.slice(0, -1));
   };
 

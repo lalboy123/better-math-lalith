@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import { hapticError, hapticSuccess, hapticTap } from '@/lib/haptics';
 
 interface EquationBuilderProps {
   num1: number;
@@ -57,6 +58,7 @@ const EquationBuilder: React.FC<EquationBuilderProps> = ({
     if (slots.includes(chip.id)) return;
     const empty = slots.indexOf(null);
     if (empty === -1) return;
+    hapticTap();
     setSlots((prev) => prev.map((s, i) => (i === empty ? chip.id : s)));
     setChecked(false);
   };
@@ -77,7 +79,12 @@ const EquationBuilder: React.FC<EquationBuilderProps> = ({
         : v1 === num1 && v2 === num2;
     setChecked(true);
     setCorrect(ok);
-    if (!ok) setAttempts((a) => a + 1);
+    if (ok) {
+      hapticSuccess();
+    } else {
+      hapticError();
+      setAttempts((a) => a + 1);
+    }
   };
 
   const retry = () => {

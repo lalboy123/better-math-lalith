@@ -9,6 +9,7 @@ import LessonShell from '@/components/LessonShell';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 
 const SubtractionNeptune: React.FC = () => {
   const navigate = useNavigate();
@@ -48,8 +49,11 @@ const SubtractionNeptune: React.FC = () => {
   const checkMcq = () => {
     setMcqChecked(true);
     if (mcqSelected !== mcqAnswer) {
+      hapticError();
       setWrongAttempts((prev) => prev + 1);
       setShowGuided(true);
+    } else {
+      hapticSuccess();
     }
   };
   

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import AuthNavButton from '@/components/AuthNavButton';
-import { Classroom, setClassDefaultStart, subscribeToClass } from '@/lib/classroom';
+import { Classroom, deleteStudent, setClassDefaultStart, subscribeToClass } from '@/lib/classroom';
 import { clearActiveTeacher, getActiveTeacher, setActiveTeacher } from '@/lib/session';
 import {
   getClassroomUnlockPlanet,
@@ -24,6 +24,8 @@ const TeacherDashboard: React.FC = () => {
   const [savingDefault, setSavingDefault] = useState(false);
   const [defaultSaved, setDefaultSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [removingKey, setRemovingKey] = useState<string | null>(null);
+  const [removeError, setRemoveError] = useState('');
 
   useEffect(() => {
     if (!classCode) return;
@@ -92,6 +94,24 @@ const TeacherDashboard: React.FC = () => {
       setSaveError('Could not save unlock setting. Try again.');
     } finally {
       setSavingDefault(false);
+    }
+  };
+
+  const handleRemoveStudent = async (studentKey: string, nickname: string) => {
+    if (removingKey) return;
+    const confirmed = window.confirm(
+      `Remove ${nickname} from this class? Their progress and quiz history will be permanently deleted.`
+    );
+    if (!confirmed) return;
+    setRemovingKey(studentKey);
+    setRemoveError('');
+    try {
+      await deleteStudent(classCode, studentKey);
+    } catch (err) {
+      console.error(err);
+      setRemoveError(`Could not remove ${nickname}. Try again.`);
+    } finally {
+      setRemovingKey(null);
     }
   };
 
@@ -171,6 +191,7 @@ const TeacherDashboard: React.FC = () => {
 
         <section className="bg-card/95 p-6 rounded-2xl shadow border border-border backdrop-blur-sm">
           <h2 className="text-xl font-semibold mb-4">Student Roster & Progress</h2>
+          {removeError && <p className="mb-3 text-sm text-destructive">{removeError}</p>}
           {loading ? (
             <div className="p-4 text-muted-foreground rounded-xl text-center border border-dashed border-border">
               Loading students…
@@ -210,6 +231,16 @@ const TeacherDashboard: React.FC = () => {
                         )}
                       </div>
                     )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={removingKey === key}
+                      onClick={() => handleRemoveStudent(key, s.nickname)}
+                      className="mt-3 w-full border-destructive/40 text-destructive hover:bg-destructive/10 min-h-[44px]"
+                    >
+                      {removingKey === key ? 'Removing…' : 'Remove student'}
+                    </Button>
                   </div>
                 );
               })}

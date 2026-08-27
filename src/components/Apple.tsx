@@ -1,4 +1,5 @@
 import React from 'react';
+import { hapticTap } from '@/lib/haptics';
 
 interface AppleProps {
   onClick?: () => void;
@@ -13,10 +14,17 @@ const Apple: React.FC<AppleProps> = ({ onClick, className = '', size = 'md' }) =
     lg: 'w-16 h-16',
   };
 
+  const handleClick = onClick
+    ? () => {
+        hapticTap();
+        onClick();
+      }
+    : undefined;
+
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       className={`${sizeClasses[size]} rounded-lg transition-transform duration-200 hover:scale-110 active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className}`}
       aria-label="Apple"
     >

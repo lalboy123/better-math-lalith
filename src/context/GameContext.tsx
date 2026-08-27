@@ -23,6 +23,7 @@ import {
   getClassroomUnlockPlanet,
   normalizePlanetId,
 } from '@/lib/planets';
+import { hapticMedium } from '@/lib/haptics';
 
 interface GameContextType {
   currentLesson: LessonType | null;
@@ -218,6 +219,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [activeSession, hydrateFromStudent, hydrateClassMax]);
 
   const completePlanet = async (planetId: PlanetId) => {
+    hapticMedium();
     const active = activeSession ?? getActiveStudent();
     if (!active) return;
 

@@ -128,6 +128,14 @@ const SolarSystemPage: React.FC = () => {
         {displayName && (
           <p className="text-sm text-muted-foreground mb-2">
             Playing as <strong className="text-foreground">{displayName}</strong>
+            {' · '}
+            <button
+              type="button"
+              onClick={() => navigate('/settings')}
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              Settings
+            </button>
           </p>
         )}
         <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">

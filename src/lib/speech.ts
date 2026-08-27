@@ -8,9 +8,25 @@ let speakTimer: ReturnType<typeof setTimeout> | null = null;
 export const isSpeechSupported = () =>
   typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-/** Remove emoji and collapse whitespace so the voice reads only real words. */
+/**
+ * Speak math symbols as words. iOS/WebKit voices often skip the minus sign
+ * ("8 − 3" is read as "8 3"), so equations must be spelled out.
+ */
+const mathSymbolsToWords = (text: string) =>
+  text
+    // Unicode minus / en dash / hyphen between numbers → "minus"
+    .replace(/(\d)\s*[−–-]\s*(\d)/g, '$1 minus $2')
+    .replace(/[−–]/g, ' minus ')
+    .replace(/(\d)\s*\+\s*(\d)/g, '$1 plus $2')
+    .replace(/\+/g, ' plus ')
+    .replace(/(\d)\s*[×x]\s*(\d)/g, '$1 times $2')
+    .replace(/(\d)\s*÷\s*(\d)/g, '$1 divided by $2')
+    .replace(/=\s*\?/g, ' equals what?')
+    .replace(/=/g, ' equals ');
+
+/** Remove emoji, speak math symbols, and collapse whitespace so the voice reads real words. */
 const cleanForSpeech = (text: string) =>
-  text.replace(EMOJI_REGEX, ' ').replace(/\s+/g, ' ').trim();
+  mathSymbolsToWords(text.replace(EMOJI_REGEX, ' ')).replace(/\s+/g, ' ').trim();
 
 const primeVoices = () => {
   if (!isSpeechSupported() || voicesPrimed) return;

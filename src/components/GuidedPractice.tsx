@@ -3,6 +3,7 @@ import { Pencil, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import { speak } from '@/lib/speech';
+import { hapticTap } from '@/lib/haptics';
 
 interface GuidedPracticeProps {
   lessonType: 'counting' | 'addition' | 'subtraction';
@@ -58,6 +59,7 @@ const GuidedPractice: React.FC<GuidedPracticeProps> = ({
   const fillNext = (group: 'first' | 'second', max: number) => {
     if (group === 'first' && firstFilled < max) {
       const next = firstFilled + 1;
+      hapticTap();
       setFirstFilled(next);
       speak(String(next));
       if (next >= max && lessonType === 'addition') {
@@ -66,6 +68,7 @@ const GuidedPractice: React.FC<GuidedPracticeProps> = ({
     }
     if (group === 'second' && secondFilled < max) {
       const next = secondFilled + 1;
+      hapticTap();
       setSecondFilled(next);
       speak(String(lessonType === 'counting' ? next : num1 + next));
     }
@@ -73,6 +76,7 @@ const GuidedPractice: React.FC<GuidedPracticeProps> = ({
 
   const crossPencil = (index: number) => {
     if (crossed[index] || crossedCount >= num2) return;
+    hapticTap();
     setCrossed((prev) => prev.map((c, i) => (i === index ? true : c)));
     speak(String(crossedCount + 1));
   };

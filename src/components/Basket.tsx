@@ -25,7 +25,9 @@ const Basket: React.FC<BasketProps> = ({ children, className = '' }) => {
         <ellipse cx="200" cy="90" rx="165" ry="35" fill="hsl(25 50% 40%)" />
         <ellipse cx="200" cy="95" rx="150" ry="28" fill="hsl(230 25% 10%)" />
       </svg>
-      <div className="absolute top-[26%] left-1/2 -translate-x-1/2 flex flex-wrap justify-center gap-1 sm:gap-2 w-[55%] min-h-[20%] items-end pb-1">
+      {/* Contained 3-column grid so up to 9 apples always stay INSIDE the basket
+          (they used to wrap into a tall stack on phones and cover the Check button). */}
+      <div className="absolute top-[24%] left-1/2 -translate-x-1/2 w-[62%] max-h-[68%] grid grid-cols-3 gap-1 sm:gap-2 place-items-center content-start overflow-hidden">
         {children}
       </div>
     </div>
