@@ -1,6 +1,7 @@
 import React from 'react';
 import HomeButton from '@/components/HomeButton';
 import NavigationArrows from '@/components/NavigationArrows';
+import Zoomable from '@/components/Zoomable';
 import type { PlanetId } from '@/lib/planets';
 
 const PLANET_DOT: Record<PlanetId, { active: string; complete: string }> = {
@@ -65,10 +66,10 @@ const LessonShell: React.FC<LessonShellProps> = ({
         </div>
       </header>
 
-      <main className="lesson-shell-main flex-1 overflow-y-auto overscroll-contain px-3 sm:px-8 py-2">
-        <div className="flex flex-col w-full max-w-4xl mx-auto min-h-full pb-4">
+      <main className="lesson-shell-main flex-1 overflow-auto overscroll-contain px-3 sm:px-8 py-2">
+        <Zoomable resetKey={`${planet}-${step}`} className="flex flex-col w-full max-w-4xl mx-auto min-h-full pb-4">
           {children}
-        </div>
+        </Zoomable>
       </main>
 
       <footer className="shrink-0 z-30 bg-background border-t border-border">
