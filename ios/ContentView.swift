@@ -391,7 +391,8 @@ private struct MathLiftWebView: UIViewRepresentable {
         webView.backgroundColor = UIColor(red: 24 / 255, green: 27 / 255, blue: 46 / 255, alpha: 1)
         webView.scrollView.backgroundColor = webView.backgroundColor
         webView.scrollView.contentInsetAdjustmentBehavior = .never
-        // Pinch-to-zoom visual models (Guideline 4.2) — pairs with viewport maximum-scale=3.
+        // Lesson pages handle pinch-to-zoom in-page (Zoomable). Keep a modest
+        // WebView zoom as a fallback for short screens like Home.
         webView.scrollView.minimumZoomScale = 1.0
         webView.scrollView.maximumZoomScale = 3.0
         webView.scrollView.bouncesZoom = true

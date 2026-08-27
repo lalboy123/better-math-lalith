@@ -111,8 +111,10 @@
 .lesson-shell-main {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  touch-action: pan-y;
-  overflow-x: hidden;
+  /* pan-y alone blocks pinch-zoom on iOS, which is why only short
+     "Great job" pages (no inner scroller capturing the gesture) zoomed. */
+  touch-action: pan-x pan-y pinch-zoom;
+  overflow: auto;
 }
 
 /* Rocket animation - smooth left-to-right travel with bigger rocket */
