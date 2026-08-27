@@ -21,7 +21,7 @@ const SupportPage: React.FC = () => {
         <h1 className="text-3xl font-semibold mb-4">Support</h1>
         <p className="text-[15px] leading-relaxed text-muted-foreground mb-8">
           MathLift is a classroom math app for counting, addition, and subtraction. Teachers create
-          a class; students join with a nickname and can resume on any device.
+          a class; students join with a generated space name and can resume on any device.
         </p>
 
         <section className="mb-8 rounded-2xl border border-border bg-card/90 p-6">
@@ -42,8 +42,9 @@ const SupportPage: React.FC = () => {
           <h2 className="text-xl font-semibold mb-3">Quick help</h2>
           <ul className="space-y-3 text-[15px] text-muted-foreground list-disc pl-5">
             <li>
-              <strong className="text-foreground">Students:</strong> use Join Class the first time,
-              then Login with the same class code and nickname on any device.
+              <strong className="text-foreground">Students:</strong> use Join Class the first time
+              (tap the dice until you like the space name), then Login with the same class code and
+              space name on any device. Open Settings to delete your account.
             </li>
             <li>
               <strong className="text-foreground">Teachers:</strong> create a class, save the teacher

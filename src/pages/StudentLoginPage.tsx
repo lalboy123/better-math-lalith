@@ -48,7 +48,7 @@ const StudentLoginPage: React.FC = () => {
 
       if (!key || !student) {
         setError(
-          `We couldn't find "${name}" in this class. Check your spelling, or go back and Join Class as a new student.`
+          `We couldn't find "${name}" in this class. Check the spelling of your space name, or go back and Join Class as a new student.`
         );
         return;
       }
@@ -85,8 +85,8 @@ const StudentLoginPage: React.FC = () => {
       <div className="w-full max-w-md bg-card/95 p-6 rounded-2xl shadow-lg border border-border animate-fade-in backdrop-blur-sm">
         <h2 className="text-2xl font-semibold mb-2">Student Login</h2>
         <p className="text-muted-foreground mb-6">
-          Welcome back! Enter the same class code and nickname you used before — works on any
-          device.
+          Welcome back! Enter the same class code and space name you used when you joined — works
+          on any device. Ask your teacher if you forget the name; they can see it on the class roster.
         </p>
 
         <form onSubmit={handleLogin}>
@@ -105,7 +105,7 @@ const StudentLoginPage: React.FC = () => {
             autoCapitalize="none"
           />
 
-          <label className="block mb-2 font-medium">Your Nickname</label>
+          <label className="block mb-2 font-medium">Your Space Name</label>
           <input
             value={nickname}
             onChange={(e) => {
@@ -113,10 +113,10 @@ const StudentLoginPage: React.FC = () => {
               setError('');
             }}
             className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
-            placeholder="The name you registered with"
+            placeholder="The generated name you joined with"
             required
             disabled={loading}
-            autoComplete="nickname"
+            autoComplete="username"
           />
 
           {error && (

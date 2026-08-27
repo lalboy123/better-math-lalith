@@ -12,6 +12,7 @@ import ReadAloudButton from '@/components/ReadAloudButton';
 import EquationBuilder from '@/components/EquationBuilder';
 import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 import { Check, X } from 'lucide-react';
 
 const SubtractionUranus: React.FC = () => {
@@ -55,7 +56,10 @@ const SubtractionUranus: React.FC = () => {
   const checkWord = () => {
     setWordChecked(true);
     if (wordPencils !== wordTarget) {
+      hapticError();
       setShowGuided(true);
+    } else {
+      hapticSuccess();
     }
   };
 
@@ -158,19 +162,31 @@ const SubtractionUranus: React.FC = () => {
               <Counter count={wordTarget} label="You need" />
             </div>
             
-            <div className="bg-card rounded-xl p-8 border border-border mb-8">
-              <div className="flex items-center justify-center gap-10">
-                <div className="flex gap-2 min-w-[150px] justify-center flex-wrap">
-                  {Array.from({ length: wordPencils }).map((_, i) => (
-                    <Pencil 
-                      key={i} 
-                      onClick={!wordChecked ? removePencilWord : undefined}
-                      className={wordChecked ? 'pointer-events-none' : ''}
-                    />
-                  ))}
+            <div className="bg-card rounded-xl p-4 sm:p-8 border border-border mb-8 w-full max-w-lg">
+              {/* Left side always shows the FULL starting group (8) so the picture
+                  keeps matching "8 − 3". Clicked pencils fade in place and reappear
+                  grayed out on the right-hand side of the minus sign. */}
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex gap-2 min-w-[8rem] justify-center flex-wrap max-w-[14rem] sm:max-w-none">
+                  {Array.from({ length: wordStart }).map((_, i) => {
+                    const givenAway = i >= wordPencils;
+                    return (
+                      <Pencil
+                        key={i}
+                        onClick={!wordChecked && !givenAway ? removePencilWord : undefined}
+                        className={
+                          givenAway
+                            ? 'pointer-events-none opacity-25 grayscale'
+                            : wordChecked
+                              ? 'pointer-events-none'
+                              : ''
+                        }
+                      />
+                    );
+                  })}
                 </div>
                 <span className="text-4xl font-bold text-uranus">−</span>
-                <div className="flex gap-2 min-w-[80px] justify-center opacity-40">
+                <div className="flex gap-2 min-w-[80px] justify-center flex-wrap opacity-40 grayscale">
                   {Array.from({ length: wordRemoved }).map((_, i) => (
                     <div key={i} className="animate-pencil-appear">
                       <Pencil className="pointer-events-none" />

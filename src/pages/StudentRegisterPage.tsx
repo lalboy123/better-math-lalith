@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Dices } from 'lucide-react';
 import {
   checkStudentExists,
   registerStudent,
@@ -10,28 +11,36 @@ import {
 } from '@/lib/classroom';
 import { getClassroomUnlockPlanet } from '@/lib/planets';
 import { getLastClassCode, setActiveStudent } from '@/lib/session';
+import { generateUsername } from '@/lib/usernames';
+import { hapticTap } from '@/lib/haptics';
 import { useGame } from '@/context/GameContext';
 import AuthNavButton from '@/components/AuthNavButton';
 import { STUDENT_HUB_PATH } from '@/lib/studentHub';
 
 const StudentRegisterPage: React.FC = () => {
   const [classCode, setClassCode] = useState(getLastClassCode());
-  const [nickname, setNickname] = useState('');
+  // Usernames are always generated on-device (never typed) so MathLift does
+  // not collect real student names. Students can re-roll as often as they like.
+  const [username, setUsername] = useState(() => generateUsername());
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [nameTaken, setNameTaken] = useState(false);
   const navigate = useNavigate();
   const { hydrateFromStudent, hydrateClassMax } = useGame();
+
+  const rollNewUsername = () => {
+    hapticTap();
+    setUsername(generateUsername());
+    setError('');
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = normalizeLabel(classCode);
-    const name = normalizeLabel(nickname);
+    let name = normalizeLabel(username);
     if (!code || !name || loading) return;
 
     setLoading(true);
     setError('');
-    setNameTaken(false);
 
     try {
       const resolved = await resolveClassCode(code);
@@ -40,14 +49,14 @@ const StudentRegisterPage: React.FC = () => {
         return;
       }
 
-      const studentExists = await checkStudentExists(resolved, name);
-      if (studentExists) {
-        setNameTaken(true);
-        setError(
-          `The name "${name}" is already in this class. Tap Login below to resume on this device.`
-        );
-        return;
+      // Extremely unlikely, but if the generated name is already taken in this
+      // class, quietly roll a fresh one until it's free.
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const taken = await checkStudentExists(resolved, name);
+        if (!taken) break;
+        name = generateUsername();
       }
+      setUsername(name);
 
       const result = await registerStudent(resolved, name);
       if (!result) {
@@ -79,8 +88,8 @@ const StudentRegisterPage: React.FC = () => {
       <div className="w-full max-w-md bg-card/95 p-6 rounded-2xl shadow-lg border border-border animate-fade-in backdrop-blur-sm">
         <h2 className="text-2xl font-semibold mb-2">Join a Class</h2>
         <p className="text-muted-foreground mb-6">
-          Enter your teacher&apos;s class code and pick a nickname. Use the same nickname later to
-          resume on any phone, tablet, or computer.
+          Enter your teacher&apos;s class code. We&apos;ll give you a fun space name — remember it (or
+          write it down) so you can resume on any phone, tablet, or computer.
         </p>
 
         <form onSubmit={handleRegister}>
@@ -90,7 +99,6 @@ const StudentRegisterPage: React.FC = () => {
             onChange={(e) => {
               setClassCode(e.target.value);
               setError('');
-              setNameTaken(false);
             }}
             className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
             placeholder="Ask your teacher for this"
@@ -100,40 +108,33 @@ const StudentRegisterPage: React.FC = () => {
             autoCapitalize="none"
           />
 
-          <label className="block mb-2 font-medium">Your Nickname</label>
-          <input
-            value={nickname}
-            onChange={(e) => {
-              setNickname(e.target.value);
-              setError('');
-              setNameTaken(false);
-            }}
-            className="w-full mb-4 text-foreground bg-background px-4 py-3 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-ring transition-shadow min-h-[48px]"
-            placeholder="Type your name"
-            required
-            disabled={loading}
-            autoComplete="nickname"
-          />
+          <label className="block mb-2 font-medium">Your Space Name</label>
+          <div className="flex items-stretch gap-2 mb-2">
+            <div
+              className="flex-1 flex items-center justify-center px-4 py-3 border border-emerald-500/40 bg-emerald-500/10 rounded-xl min-h-[48px]"
+              aria-live="polite"
+            >
+              <span className="text-xl font-bold tracking-wide text-foreground">{username}</span>
+            </div>
+            <button
+              type="button"
+              onClick={rollNewUsername}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-border bg-background text-foreground font-semibold hover:bg-muted hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 min-h-[48px] disabled:opacity-60"
+              aria-label="Get a new space name"
+            >
+              <Dices className="w-5 h-5" aria-hidden />
+              <span className="hidden sm:inline">New Name</span>
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">
+            Don&apos;t like it? Tap the dice for a new one — as many times as you want. We use fun
+            made-up names instead of real names to keep you safe.
+          </p>
 
           {error && (
             <div className="mb-4 p-3 bg-destructive/15 text-destructive rounded-xl text-sm border border-destructive/30">
               {error}
-              {nameTaken && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate('/student-login', {
-                      state: {
-                        classCode: normalizeLabel(classCode),
-                        nickname: normalizeLabel(nickname),
-                      },
-                    })
-                  }
-                  className="mt-2 block w-full text-center font-semibold underline underline-offset-2 hover:opacity-90 min-h-[44px]"
-                >
-                  Go to Login
-                </button>
-              )}
             </div>
           )}
 

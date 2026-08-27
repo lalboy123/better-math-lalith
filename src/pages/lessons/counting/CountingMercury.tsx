@@ -11,6 +11,7 @@ import LessonCelebration from '@/components/LessonCelebration';
 import LessonShell from '@/components/LessonShell';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import { Button } from '@/components/ui/button';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 import { Check, X } from 'lucide-react';
 
 const CountingMercury: React.FC = () => {
@@ -37,7 +38,13 @@ const CountingMercury: React.FC = () => {
 
   const checkWordProblem = () => {
     setWordProblemChecked(true);
-    setWordProblemCorrect(wordProblemCount === targetCount);
+    const correct = wordProblemCount === targetCount;
+    setWordProblemCorrect(correct);
+    if (correct) {
+      hapticSuccess();
+    } else {
+      hapticError();
+    }
   };
 
   const resetWordProblem = () => {
@@ -102,20 +109,20 @@ const CountingMercury: React.FC = () => {
               
               <Basket>
                 {Array.from({ length: wordProblemCount }).map((_, i) => (
-                  <Apple key={i} size="lg" className="pointer-events-none" />
+                  <Apple key={i} size="sm" className="pointer-events-none" />
                 ))}
               </Basket>
               
               {!wordProblemChecked && (
-                <div className="flex flex-wrap justify-center gap-3 max-w-md">
+                <div className="flex flex-wrap justify-center gap-2 sm:gap-3 max-w-md">
                   {Array.from({ length: wordProblemAvailable }).map((_, i) => (
-                    <Apple key={i} onClick={addAppleToWordProblem} size="lg" />
+                    <Apple key={i} onClick={addAppleToWordProblem} size="md" />
                   ))}
                 </div>
               )}
               
               {!wordProblemChecked ? (
-                <Button onClick={checkWordProblem} className="mt-4" size="lg">
+                <Button onClick={checkWordProblem} className="mt-4 relative z-20" size="lg">
                   Check
                 </Button>
               ) : (

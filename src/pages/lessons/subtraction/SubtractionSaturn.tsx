@@ -11,6 +11,7 @@ import LessonCelebration from '@/components/LessonCelebration';
 import ReadAloudButton from '@/components/ReadAloudButton';
 import GuidedPractice from '@/components/GuidedPractice';
 import { Button } from '@/components/ui/button';
+import { hapticError, hapticSuccess } from '@/lib/haptics';
 import { Check, X, Play, RotateCcw } from 'lucide-react';
 
 const SubtractionSaturn: React.FC = () => {
@@ -76,7 +77,10 @@ const SubtractionSaturn: React.FC = () => {
   const checkActivity2 = () => {
     setActivity2Checked(true);
     if (activity2Pencils !== activity2Target) {
+      hapticError();
       setShowGuided(true);
+    } else {
+      hapticSuccess();
     }
   };
 
@@ -193,16 +197,25 @@ const SubtractionSaturn: React.FC = () => {
             </p>
             
             <div className="bg-card rounded-xl p-6 sm:p-10 border border-border mb-8 w-full max-w-lg">
+              {/* Left side always shows all 6 pencils (taken ones fade in place);
+                  taken pencils show up grayed on the right of the minus sign. */}
               <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
                 <div className="flex flex-wrap justify-center gap-2 min-w-[8rem] max-w-[12rem] sm:max-w-none">
-                  {Array.from({ length: leftPencils }).map((_, i) => (
-                    <Pencil key={i} onClick={removePencil} />
-                  ))}
+                  {Array.from({ length: 6 }).map((_, i) => {
+                    const taken = i >= leftPencils;
+                    return (
+                      <Pencil
+                        key={i}
+                        onClick={!taken ? removePencil : undefined}
+                        className={taken ? 'pointer-events-none opacity-25 grayscale' : ''}
+                      />
+                    );
+                  })}
                 </div>
                 
                 <span className="text-5xl font-bold text-saturn">−</span>
                 
-                <div className="flex gap-2 min-w-[100px] justify-center opacity-40">
+                <div className="flex gap-2 min-w-[100px] justify-center flex-wrap opacity-40 grayscale">
                   {Array.from({ length: removedPencils }).map((_, i) => (
                     <div key={i} className="animate-pencil-appear">
                       <Pencil className="pointer-events-none" />
@@ -241,20 +254,31 @@ const SubtractionSaturn: React.FC = () => {
             </div>
             
             <div className="bg-card rounded-xl p-6 sm:p-10 border border-border mb-8 w-full max-w-lg">
+              {/* Left side always shows the full starting group of 7 so the picture
+                  keeps matching "7 − 3"; taken pencils gray out on the right. */}
               <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
                 <div className="flex flex-wrap justify-center gap-2 min-w-[8rem] max-w-[12rem] sm:max-w-none">
-                  {Array.from({ length: activity2Pencils }).map((_, i) => (
-                    <Pencil 
-                      key={i} 
-                      onClick={!activity2Checked ? removePencilActivity2 : undefined} 
-                      className={activity2Checked ? 'pointer-events-none' : ''}
-                    />
-                  ))}
+                  {Array.from({ length: activity2Start }).map((_, i) => {
+                    const taken = i >= activity2Pencils;
+                    return (
+                      <Pencil
+                        key={i}
+                        onClick={!activity2Checked && !taken ? removePencilActivity2 : undefined}
+                        className={
+                          taken
+                            ? 'pointer-events-none opacity-25 grayscale'
+                            : activity2Checked
+                              ? 'pointer-events-none'
+                              : ''
+                        }
+                      />
+                    );
+                  })}
                 </div>
                 
                 <span className="text-5xl font-bold text-saturn">−</span>
                 
-                <div className="flex gap-2 min-w-[100px] justify-center opacity-40">
+                <div className="flex gap-2 min-w-[100px] justify-center flex-wrap opacity-40 grayscale">
                   {Array.from({ length: activity2Removed }).map((_, i) => (
                     <div key={i} className="animate-pencil-appear">
                       <Pencil className="pointer-events-none" />

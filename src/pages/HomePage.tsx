@@ -6,6 +6,8 @@ import {
   getActiveStudent,
   getActiveTeacher,
   getStudentDisplayName,
+  reconcileExclusiveSession,
+  SESSION_CHANGED,
   type ActiveStudent,
   type ActiveTeacher,
 } from '@/lib/session';
@@ -17,8 +19,14 @@ const HomePage: React.FC = () => {
   const [teacherSession, setTeacherSession] = useState<ActiveTeacher | null>(null);
 
   useEffect(() => {
-    setStudentSession(getActiveStudent());
-    setTeacherSession(getActiveTeacher());
+    const sync = () => {
+      reconcileExclusiveSession();
+      setStudentSession(getActiveStudent());
+      setTeacherSession(getActiveTeacher());
+    };
+    sync();
+    window.addEventListener(SESSION_CHANGED, sync);
+    return () => window.removeEventListener(SESSION_CHANGED, sync);
   }, []);
 
   const handleStudentSignOut = () => {
@@ -45,7 +53,7 @@ const HomePage: React.FC = () => {
         </h1>
         <p className="text-lg text-muted-foreground max-w-md mx-auto mb-8">
           Students join with a class code. Teachers manage live progress. Resume anytime on any
-          device.
+          device. Students get a fun generated space name instead of typing a real name.
         </p>
       </div>
 
@@ -146,6 +154,9 @@ const HomePage: React.FC = () => {
       </div>
 
       <footer className="mt-12 text-center text-sm text-muted-foreground flex flex-wrap justify-center gap-x-4 gap-y-2">
+        <Link to="/settings" className="hover:text-foreground transition-colors underline-offset-4 hover:underline">
+          Settings
+        </Link>
         <Link to="/support" className="hover:text-foreground transition-colors underline-offset-4 hover:underline">
           Support
         </Link>

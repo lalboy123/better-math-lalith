@@ -14,6 +14,7 @@ import {
 import GuidedPractice from '@/components/GuidedPractice';
 import NumberPad from '@/components/NumberPad';
 import ReadAloudButton from '@/components/ReadAloudButton';
+import { hapticError, hapticSuccess, hapticTap } from '@/lib/haptics';
 
 interface Question {
   story: string;
@@ -338,6 +339,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     if (slots.includes(chip.id)) return;
     const emptyIndex = slots.indexOf(null);
     if (emptyIndex === -1) return;
+    hapticTap();
     setSlots(prev => prev.map((s, i) => (i === emptyIndex ? chip.id : s)));
     setEquationChecked(false);
   };
@@ -359,7 +361,11 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
         : v1 === question.num1 && v2 === question.num2;
     setEquationChecked(true);
     setEquationCorrect(correct);
+    if (correct) {
+      hapticSuccess();
+    }
     if (!correct) {
+      hapticError();
       setEquationAttempts((prev) => prev + 1);
       if (!wrongTopics.includes(lessonType)) {
         setWrongTopics((prev) => [...prev, lessonType]);
@@ -392,6 +398,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
     const isAnswerCorrect = effectiveAnswer === question.answer;
 
     if (isAnswerCorrect) {
+      hapticSuccess();
       // Award star even if they got it right on retry
       const newStars = [...stars];
       newStars[currentQuestion] = true;
@@ -399,6 +406,7 @@ const StoryQuiz: React.FC<StoryQuizProps> = ({ lessonType, onComplete }) => {
       setCurrentAffirmation(affirmations[currentQuestion % affirmations.length]);
       setShowAffirmation(true);
     } else {
+      hapticError();
       // Only first wrong solve attempt counts toward "areas to practice"
       if (wrongAttempts === 0 && !wrongTopics.includes(lessonType)) {
         setWrongTopics((prev) => [...prev, lessonType]);

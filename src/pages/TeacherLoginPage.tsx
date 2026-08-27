@@ -22,7 +22,7 @@ const TeacherLoginPage: React.FC = () => {
 
     try {
       const result = await verifyTeacherPin(code, pin);
-      if (!result.ok) {
+      if (result.ok === false) {
         setError(result.reason);
         return;
       }
