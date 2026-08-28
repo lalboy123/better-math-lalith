@@ -50,6 +50,16 @@ private enum MathLiftTab: String, CaseIterable, Identifiable {
         case .settings: return "/settings"
         }
     }
+
+    /// Match a web path (possibly with a query or trailing slash) to a tab.
+    static func from(path raw: String) -> MathLiftTab? {
+        let withoutQuery = raw.split(separator: "?").first.map(String.init) ?? raw
+        var path = withoutQuery
+        while path.count > 1, path.hasSuffix("/") {
+            path.removeLast()
+        }
+        return allCases.first { $0.path == path }
+    }
 }
 
 // MARK: - Keychain (Guideline 1.6 — never store sessions in UserDefaults)
@@ -263,6 +273,12 @@ struct ContentView: View {
                 reloadToken += 1
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .mathLiftSelectTab)) { notification in
+            guard let tab = notification.object as? MathLiftTab else { return }
+            if selectedTab != tab {
+                selectedTab = tab
+            }
+        }
     }
 
     private var nativeHeader: some View {
@@ -296,7 +312,14 @@ struct ContentView: View {
             ForEach(MathLiftTab.allCases) { tab in
                 Button {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    selectedTab = tab
+                    if selectedTab == tab {
+                        // Already highlighted — still send the web view to this
+                        // tab so a stale screen (e.g. Home after deleting from
+                        // Settings) cannot trap the user on the wrong page.
+                        NotificationCenter.default.post(name: .mathLiftOpenTab, object: tab.path)
+                    } else {
+                        selectedTab = tab
+                    }
                 } label: {
                     VStack(spacing: 4) {
                         Image(systemName: tab.systemImage)
@@ -461,6 +484,12 @@ private struct MathLiftWebView: UIViewRepresentable {
                 name: .mathLiftGoBack,
                 object: nil
             )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(openTabFromNotification(_:)),
+                name: .mathLiftOpenTab,
+                object: nil
+            )
             prepareHaptics()
         }
 
@@ -485,12 +514,20 @@ private struct MathLiftWebView: UIViewRepresentable {
             }
         }
 
+        /// Hop off the current SwiftUI update so we never set @State from updateUIView.
+        private func updateParent(_ work: @escaping (MathLiftWebView) -> Void) {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                work(self.parent)
+            }
+        }
+
         func load(path: String, force: Bool) {
             guard let webView else { return }
             let url = mathLiftRoot.appendingPathComponent(String(path.drop(while: { $0 == "/" })))
             let target = path == "/" ? mathLiftRoot : url
             if !force, webView.url?.host == target.host, webView.isLoading { return }
-            parent.onLoadingChange(true)
+            updateParent { $0.onLoadingChange(true) }
             // ATS: HTTPS only. Never disable App Transport Security in Info.plist.
             webView.load(URLRequest(url: target, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30))
         }
@@ -521,29 +558,50 @@ private struct MathLiftWebView: UIViewRepresentable {
             }
         }
 
+        @objc private func openTabFromNotification(_ notification: Notification) {
+            guard let path = notification.object as? String else { return }
+            lastTabPath = path
+            navigateInApp(to: path)
+        }
+
         func userContentController(
             _ userContentController: WKUserContentController,
             didReceive message: WKScriptMessage
         ) {
             guard message.name == "mathlift" else { return }
 
-            if let body = message.body as? [String: Any], let type = body["type"] as? String, type == "storage" {
-                let key = body["key"] as? String ?? ""
-                let value = body["value"] as? String
-                DispatchQueue.main.async {
-                    MathLiftKeychain.persistWebStorage(key: key, json: value)
+            if let body = message.body as? [String: Any], let type = body["type"] as? String {
+                switch type {
+                case "storage":
+                    let key = body["key"] as? String ?? ""
+                    let value = body["value"] as? String
+                    DispatchQueue.main.async {
+                        MathLiftKeychain.persistWebStorage(key: key, json: value)
+                    }
+                    return
+                case "selectTab":
+                    let path = body["path"] as? String ?? ""
+                    guard let tab = MathLiftTab.from(path: path) else { return }
+                    DispatchQueue.main.async {
+                        self.lastTabPath = tab.path
+                        NotificationCenter.default.post(name: .mathLiftSelectTab, object: tab)
+                    }
+                    return
+                case "haptic":
+                    let style = (body["style"] as? String) ?? "light"
+                    DispatchQueue.main.async {
+                        self.playHaptic(style)
+                    }
+                    return
+                default:
+                    return
                 }
-                return
             }
 
-            var style = "light"
-            if let body = message.body as? [String: Any] {
-                style = (body["style"] as? String) ?? style
-            } else if let body = message.body as? String {
-                style = body
-            }
-            DispatchQueue.main.async {
-                self.playHaptic(style)
+            if let body = message.body as? String {
+                DispatchQueue.main.async {
+                    self.playHaptic(body)
+                }
             }
         }
 
@@ -608,13 +666,19 @@ private struct MathLiftWebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            parent.onLoadingChange(true)
-            parent.onCanGoBackChange(webView.canGoBack)
+            let canGo = webView.canGoBack
+            updateParent {
+                $0.onLoadingChange(true)
+                $0.onCanGoBackChange(canGo)
+            }
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            parent.onLoadingChange(false)
-            parent.onCanGoBackChange(webView.canGoBack)
+            let canGo = webView.canGoBack
+            updateParent {
+                $0.onLoadingChange(false)
+                $0.onCanGoBackChange(canGo)
+            }
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -634,13 +698,15 @@ private struct MathLiftWebView: UIViewRepresentable {
             if nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled {
                 return
             }
-            parent.onLoadFailed()
+            updateParent { $0.onLoadFailed() }
         }
     }
 }
 
 private extension Notification.Name {
     static let mathLiftGoBack = Notification.Name("MathLiftGoBack")
+    static let mathLiftOpenTab = Notification.Name("MathLiftOpenTab")
+    static let mathLiftSelectTab = Notification.Name("MathLiftSelectTab")
 }
 
 #Preview {
