@@ -242,12 +242,7 @@ struct ContentView: View {
                         isLoading = false
                         loadFailed = true
                     },
-                    onCanGoBackChange: { canGoBack = $0 },
-                    onSelectTab: { tab in
-                        if selectedTab != tab {
-                            selectedTab = tab
-                        }
-                    }
+                    onCanGoBackChange: { canGoBack = $0 }
                 )
                 .opacity(showOffline ? 0 : 1)
 
@@ -276,6 +271,12 @@ struct ContentView: View {
                 loadFailed = false
                 isLoading = true
                 reloadToken += 1
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .mathLiftSelectTab)) { notification in
+            guard let tab = notification.object as? MathLiftTab else { return }
+            if selectedTab != tab {
+                selectedTab = tab
             }
         }
     }
@@ -387,7 +388,6 @@ private struct MathLiftWebView: UIViewRepresentable {
     let onLoadingChange: (Bool) -> Void
     let onLoadFailed: () -> Void
     let onCanGoBackChange: (Bool) -> Void
-    let onSelectTab: (MathLiftTab) -> Void
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -514,12 +514,20 @@ private struct MathLiftWebView: UIViewRepresentable {
             }
         }
 
+        /// Hop off the current SwiftUI update so we never set @State from updateUIView.
+        private func updateParent(_ work: @escaping (MathLiftWebView) -> Void) {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                work(self.parent)
+            }
+        }
+
         func load(path: String, force: Bool) {
             guard let webView else { return }
             let url = mathLiftRoot.appendingPathComponent(String(path.drop(while: { $0 == "/" })))
             let target = path == "/" ? mathLiftRoot : url
             if !force, webView.url?.host == target.host, webView.isLoading { return }
-            parent.onLoadingChange(true)
+            updateParent { $0.onLoadingChange(true) }
             // ATS: HTTPS only. Never disable App Transport Security in Info.plist.
             webView.load(URLRequest(url: target, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30))
         }
@@ -576,7 +584,7 @@ private struct MathLiftWebView: UIViewRepresentable {
                     guard let tab = MathLiftTab.from(path: path) else { return }
                     DispatchQueue.main.async {
                         self.lastTabPath = tab.path
-                        self.parent.onSelectTab(tab)
+                        NotificationCenter.default.post(name: .mathLiftSelectTab, object: tab)
                     }
                     return
                 case "haptic":
@@ -658,13 +666,19 @@ private struct MathLiftWebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            parent.onLoadingChange(true)
-            parent.onCanGoBackChange(webView.canGoBack)
+            let canGo = webView.canGoBack
+            updateParent {
+                $0.onLoadingChange(true)
+                $0.onCanGoBackChange(canGo)
+            }
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            parent.onLoadingChange(false)
-            parent.onCanGoBackChange(webView.canGoBack)
+            let canGo = webView.canGoBack
+            updateParent {
+                $0.onLoadingChange(false)
+                $0.onCanGoBackChange(canGo)
+            }
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -684,7 +698,7 @@ private struct MathLiftWebView: UIViewRepresentable {
             if nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorCancelled {
                 return
             }
-            parent.onLoadFailed()
+            updateParent { $0.onLoadFailed() }
         }
     }
 }
@@ -692,6 +706,7 @@ private struct MathLiftWebView: UIViewRepresentable {
 private extension Notification.Name {
     static let mathLiftGoBack = Notification.Name("MathLiftGoBack")
     static let mathLiftOpenTab = Notification.Name("MathLiftOpenTab")
+    static let mathLiftSelectTab = Notification.Name("MathLiftSelectTab")
 }
 
 #Preview {
