@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const COMPANY_NAME = 'MathLift';
 const SUPPORT_EMAIL = 'mathlift1234@gmail.com';
-const LAST_UPDATED = 'August 27, 2026';
+const LAST_UPDATED = 'August 28, 2026';
 const WEBSITE_URL = 'https://better-math-lalith.vercel.app';
 
 const PrivacyPolicyPage: React.FC = () => {
@@ -31,9 +31,10 @@ const PrivacyPolicyPage: React.FC = () => {
             MathLift is a classroom math app for counting, addition, and subtraction. It is designed
             for schools. Students do not create email accounts and do not type their real names.
             This policy explains exactly what data we collect, why, how long we keep it, who it is
-            shared with, and how to delete it. It is written to meet Apple App Store Guidelines 5.1
-            and 1.6, and to support school obligations under FERPA and COPPA (the school may act as
-            the parent&apos;s authorized agent for children under 13).
+            shared with, and how to delete it. It is written to meet Apple&apos;s Developer Code of
+            Conduct (not the App Store Guidelines), including guidelines 5.1 and 1.6 among other
+            requirements — not only those two — and to support school obligations under FERPA and
+            COPPA (the school may act as the parent&apos;s authorized agent for children under 13).
           </p>
           <p>
             Contact:{' '}
@@ -169,7 +170,10 @@ const PrivacyPolicyPage: React.FC = () => {
             We keep a student record only while that student remains in the class. We keep a class
             record only while the teacher maintains the class.
           </p>
-          <p>You can revoke consent and delete data at any time:</p>
+          <p>
+            You can revoke consent and delete data at any time using the in-app controls below. An
+            email request is not required for deletion.
+          </p>
           <ul className="list-disc pl-5 space-y-2">
             <li>
               <strong>Student:</strong> open Settings in the app → Delete My Account. This removes
@@ -181,7 +185,8 @@ const PrivacyPolicyPage: React.FC = () => {
               teacher PIN, and class code.
             </li>
             <li>
-              <strong>Email request:</strong> write to{' '}
+              <strong>Optional email request:</strong> you do not need to email us to delete data.
+              If you cannot use the in-app controls, write to{' '}
               <a href={`mailto:${SUPPORT_EMAIL}`} className="text-blue-700 hover:underline font-medium">
                 {SUPPORT_EMAIL}
               </a>{' '}
@@ -208,9 +213,10 @@ const PrivacyPolicyPage: React.FC = () => {
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-3 text-[15px] leading-relaxed text-slate-600">
           <h2 className="text-xl font-semibold text-slate-900">Your rights</h2>
           <p>
-            Depending on where you live, you may have rights to access, correct, or delete personal
-            data. Use the in-app deletion controls or email {SUPPORT_EMAIL}. We will not
-            discriminate against you for exercising those rights.
+            In every region where MathLift is available, you can access, correct, or delete personal
+            data. Use the in-app deletion controls described above. Emailing {SUPPORT_EMAIL} is
+            optional and is not required to access or delete your data. We will not discriminate
+            against you for exercising those rights.
           </p>
         </section>
 
