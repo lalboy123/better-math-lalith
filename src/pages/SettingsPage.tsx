@@ -203,12 +203,14 @@ const SettingsPage: React.FC = () => {
             <Link to="/support" className="text-primary font-medium hover:underline min-h-[44px] flex items-center">
               Support
             </Link>
-            <a
-              href={`mailto:${SUPPORT_EMAIL}?subject=MathLift%20data%20deletion%20request`}
-              className="text-primary font-medium hover:underline min-h-[44px] flex items-center"
-            >
-              Email a deletion request ({SUPPORT_EMAIL})
-            </a>
+            {!teacher && (
+              <a
+                href={`mailto:${SUPPORT_EMAIL}?subject=MathLift%20data%20deletion%20request`}
+                className="text-primary font-medium hover:underline min-h-[44px] flex items-center"
+              >
+                Email a deletion request ({SUPPORT_EMAIL})
+              </a>
+            )}
           </div>
         </section>
       </main>
