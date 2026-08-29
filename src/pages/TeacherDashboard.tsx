@@ -26,6 +26,9 @@ const TeacherDashboard: React.FC = () => {
   const [saveError, setSaveError] = useState('');
   const [removingKey, setRemovingKey] = useState<string | null>(null);
   const [removeError, setRemoveError] = useState('');
+  const [pendingRemove, setPendingRemove] = useState<{ key: string; nickname: string } | null>(
+    null
+  );
 
   useEffect(() => {
     if (!classCode) return;
@@ -97,16 +100,18 @@ const TeacherDashboard: React.FC = () => {
     }
   };
 
-  const handleRemoveStudent = async (studentKey: string, nickname: string) => {
-    if (removingKey) return;
-    const confirmed = window.confirm(
-      `Remove ${nickname} from this class? Their progress and quiz history will be permanently deleted.`
-    );
-    if (!confirmed) return;
+  const handleRemoveStudent = async () => {
+    if (!pendingRemove || removingKey) return;
+    const { key: studentKey, nickname } = pendingRemove;
     setRemovingKey(studentKey);
     setRemoveError('');
     try {
-      await deleteStudent(classCode, studentKey);
+      const removed = await deleteStudent(classCode, studentKey);
+      if (!removed) {
+        setRemoveError(`Could not remove ${nickname}. They may already be gone — refresh and try again.`);
+        return;
+      }
+      setPendingRemove(null);
     } catch (err) {
       console.error(err);
       setRemoveError(`Could not remove ${nickname}. Try again.`);
@@ -231,16 +236,52 @@ const TeacherDashboard: React.FC = () => {
                         )}
                       </div>
                     )}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={removingKey === key}
-                      onClick={() => handleRemoveStudent(key, s.nickname)}
-                      className="mt-3 w-full border-destructive/40 text-destructive hover:bg-destructive/10 min-h-[44px]"
-                    >
-                      {removingKey === key ? 'Removing…' : 'Remove student'}
-                    </Button>
+                    {pendingRemove?.key === key ? (
+                      <div className="mt-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 space-y-2">
+                        <p className="text-sm font-medium text-foreground">
+                          Remove {s.nickname}? Progress and quiz history will be deleted.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            disabled={removingKey === key}
+                            onClick={handleRemoveStudent}
+                            className="flex-1 min-h-[44px]"
+                          >
+                            {removingKey === key ? 'Removing…' : 'Yes, remove'}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={!!removingKey}
+                            onClick={() => {
+                              setPendingRemove(null);
+                              setRemoveError('');
+                            }}
+                            className="flex-1 min-h-[44px]"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={!!removingKey}
+                        onClick={() => {
+                          setRemoveError('');
+                          setPendingRemove({ key, nickname: s.nickname });
+                        }}
+                        className="mt-3 w-full border-destructive/40 text-destructive hover:bg-destructive/10 min-h-[44px]"
+                      >
+                        Remove student
+                      </Button>
+                    )}
                   </div>
                 );
               })}

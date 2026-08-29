@@ -275,11 +275,15 @@ export const setClassDefaultStart = async (classCode: string, planet: string) =>
 };
 
 /** Permanently remove one student (username + progress + quiz history) from a class. */
-export const deleteStudent = async (classCode: string, nickname: string): Promise<boolean> => {
+export const deleteStudent = async (classCode: string, nicknameOrKey: string): Promise<boolean> => {
   const resolved = await resolveClassCode(classCode);
   if (!resolved) return false;
   const cls = await getClassById(resolved);
-  const key = findStudentKey(cls?.students, nickname);
+  const students = cls?.students;
+  const key =
+    students && Object.prototype.hasOwnProperty.call(students, nicknameOrKey)
+      ? nicknameOrKey
+      : findStudentKey(students, nicknameOrKey);
   if (!key) return false;
   await updateDoc(doc(db, 'classrooms', resolved), {
     [`students.${key}`]: deleteField(),
