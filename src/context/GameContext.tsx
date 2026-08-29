@@ -36,6 +36,7 @@ interface GameContextType {
   completedPlanets: Record<PlanetId, boolean>;
   progressPlanetId: PlanetId;
   classMaxPlanetId: PlanetId;
+  lastPlanetId: PlanetId | null;
   completePlanet: (planetId: PlanetId) => Promise<void>;
   getOrderedSequence: () => { planet: PlanetId; lesson: LessonType }[];
   setPosition: (planet: PlanetId, lesson: LessonType) => void;
@@ -63,6 +64,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [completedPlanets, setCompletedPlanets] = useState<Record<PlanetId, boolean>>(emptyCompleted);
   const [progressPlanetId, setProgressPlanetId] = useState<PlanetId>('sun');
   const [classMaxPlanetId, setClassMaxPlanetId] = useState<PlanetId>('sun');
+  const [lastPlanetId, setLastPlanetId] = useState<PlanetId | null>(null);
   const [activeSession, setActiveSession] = useState<ActiveStudent | null>(() =>
     getActiveStudent()
   );
@@ -73,6 +75,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCompletedPlanets(emptyCompleted());
     setProgressPlanetId('sun');
     setClassMaxPlanetId('sun');
+    setLastPlanetId(null);
     setShowRocketTransition(false);
   }, []);
 
@@ -90,6 +93,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const progressPlanet = getFurthestProgressPlanet(student);
     setCurrentLesson(student.lesson);
     setProgressPlanetId(progressPlanet);
+    setLastPlanetId((prev) => normalizePlanetId(student.lastPlanet) ?? prev);
     setCompletedPlanets(
       buildCompletedMap(progressPlanet, student.completedPlanets ?? [])
     );
@@ -134,6 +138,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const markPlanetVisited = useCallback(
     async (planetId: PlanetId) => {
+      setLastPlanetId(planetId);
       setProgressPlanetId((prev) =>
         getPlanetIndex(planetId) >= getPlanetIndex(prev) ? planetId : prev
       );
@@ -156,6 +161,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           ...existing,
           planet: nextPlanet,
           lesson: getLessonForPlanet(nextPlanet),
+          lastPlanet: planetId,
           lastUpdated: Date.now(),
         },
         active.nickname
@@ -237,6 +243,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setCompletedPlanets((prev) => ({ ...prev, [planetId]: true }));
     setProgressPlanetId(nextPlanet);
+    setLastPlanetId(nextPlanet);
     setCurrentLesson(nextLesson);
 
     if (!existing) return;
@@ -247,6 +254,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ...existing,
         planet: nextPlanet,
         lesson: nextLesson,
+        lastPlanet: nextPlanet,
         completedPlanets: completedList,
         planetSteps: { ...(existing.planetSteps ?? {}) },
         lastUpdated: Date.now(),
@@ -284,6 +292,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         completedPlanets,
         progressPlanetId,
         classMaxPlanetId,
+        lastPlanetId,
         completePlanet,
         getOrderedSequence,
         setPosition,

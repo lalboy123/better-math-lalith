@@ -105,13 +105,23 @@ export const getFurthestProgressPlanet = (
 
 /**
  * Planet the student should continue on.
- * Prefers the current planet (even at step 0) so the hub updates as soon as
- * they open a new world, not only after they advance a lesson step.
+ * Prefers the last lesson they actually opened (including replays of earlier
+ * worlds) over furthest unlock / class start, so "continue where you left off"
+ * matches where they were — not Neptune just because the teacher unlocked it.
  */
 export const getInProgressPlanet = (
   planetSteps: Record<string, number> | undefined,
-  currentPlanet?: string | null
+  currentPlanet?: string | null,
+  lastPlanet?: string | null
 ): PlanetId | null => {
+  const last = normalizePlanetId(lastPlanet);
+  if (last) {
+    const hasSteps = Object.values(planetSteps ?? {}).some((step) => step > 0);
+    // Don't prompt "continue on the Sun" for a brand-new student at step 0.
+    if (!hasSteps && getPlanetIndex(last) === 0) return null;
+    return last;
+  }
+
   let best: PlanetId | null = null;
   let bestIndex = -1;
   for (const [planet, step] of Object.entries(planetSteps ?? {})) {

@@ -60,9 +60,8 @@ export function useLessonStep(planetId: PlanetId) {
   }, [planetId, isReplay]);
 
   useEffect(() => {
-    if (isReplay) return;
     void markPlanetVisited(planetId);
-  }, [planetId, isReplay, markPlanetVisited]);
+  }, [planetId, markPlanetVisited]);
 
   // Persist when leaving the lesson (home, logout, back to planet ring)
   useEffect(() => {

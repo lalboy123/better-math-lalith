@@ -30,6 +30,8 @@ const SolarSystemPage: React.FC = () => {
     setPosition,
     getPlanetStep,
     planetSteps,
+    lastPlanetId,
+    markPlanetVisited,
     hydrateFromStudent,
     hydrateClassMax,
   } = useGame();
@@ -84,7 +86,7 @@ const SolarSystemPage: React.FC = () => {
   const classMax =
     getClassroomUnlockPlanet(classroom) ?? classMaxPlanetId ?? 'sun';
   const maxPlanetName = PLANET_META[classMax as PlanetId]?.name ?? 'Sun';
-  const continuePlanet = getInProgressPlanet(planetSteps, progressPlanetId);
+  const continuePlanet = getInProgressPlanet(planetSteps, progressPlanetId, lastPlanetId);
 
   const maxOrbitRadius = useMemo(() => {
     let max = 0;
@@ -110,6 +112,7 @@ const SolarSystemPage: React.FC = () => {
     const savedStep = isCompleted ? 0 : getPlanetStep(planetId);
     setSelecting(true);
     setPosition(planetId, lesson);
+    void markPlanetVisited(planetId);
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate(getLessonRoute(planetId), {
