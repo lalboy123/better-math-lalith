@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const COMPANY_NAME = 'MathLift';
 const SUPPORT_EMAIL = 'mathlift1234@gmail.com';
-const LAST_UPDATED = 'August 28, 2026';
+const LAST_UPDATED = 'August 29, 2026';
 const WEBSITE_URL = 'https://better-math-lalith.vercel.app';
 
 const PrivacyPolicyPage: React.FC = () => {
@@ -32,8 +32,7 @@ const PrivacyPolicyPage: React.FC = () => {
             for schools. Students do not create email accounts and do not type their real names.
             This policy explains exactly what data we collect, why, how long we keep it, who it is
             shared with, and how to delete it. It is written to meet Apple&apos;s Developer Code of
-            Conduct (not the App Store Guidelines), including guidelines 5.1 and 1.6 among other
-            requirements — not only those two — and to support school obligations under FERPA and
+            Conduct (not the App Store Guidelines) and to support school obligations under FERPA and
             COPPA (the school may act as the parent&apos;s authorized agent for children under 13).
           </p>
           <p>
