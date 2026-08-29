@@ -36,6 +36,8 @@ export interface StudentState {
   lesson: LessonType;
   completedPlanets?: string[];
   planetSteps?: Record<string, number>;
+  /** Last planet whose lesson the student opened, including replays. */
+  lastPlanet?: string;
   lastQuiz?: LastQuizSummary;
   lastUpdated: number;
 }

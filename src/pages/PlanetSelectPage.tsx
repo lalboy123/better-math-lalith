@@ -29,6 +29,8 @@ const PlanetSelectPage: React.FC = () => {
     setPosition,
     getPlanetStep,
     planetSteps,
+    lastPlanetId,
+    markPlanetVisited,
     hydrateFromStudent,
     hydrateClassMax,
   } = useGame();
@@ -98,6 +100,7 @@ const PlanetSelectPage: React.FC = () => {
     const savedStep = isCompleted ? 0 : getPlanetStep(pid);
     setSelecting(true);
     setPosition(pid, lesson);
+    void markPlanetVisited(pid);
     setShowRocketTransition(true);
     setTimeout(() => {
       navigate(getLessonRoute(planetId), {
@@ -109,7 +112,7 @@ const PlanetSelectPage: React.FC = () => {
   };
 
   const maxPlanetName = PLANET_META[classMax as PlanetId]?.name ?? 'Sun';
-  const continuePlanet = getInProgressPlanet(planetSteps, progressPlanetId);
+  const continuePlanet = getInProgressPlanet(planetSteps, progressPlanetId, lastPlanetId);
 
   return (
     <div className="min-h-screen bg-background subtle-stars flex flex-col items-center justify-center p-8">
